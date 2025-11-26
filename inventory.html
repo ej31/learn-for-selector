@@ -81,6 +81,66 @@
             text-decoration: none;
             font-weight: bold;
         }
+
+        /* --- Modal (신규 등록 팝업) 스타일 추가 --- */
+        .modal {
+            display: none; /* 기본 숨김 */
+            position: fixed; 
+            z-index: 100; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; 
+            padding: 25px;
+            border: 1px solid #888;
+            width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover {
+            color: black;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn-save {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-save:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
@@ -96,7 +156,6 @@
 
     <div class="controls">
         <label for="category-filter">카테고리 필터:</label>
-        <!-- 연습 포인트: Select 클래스 사용 (SelectByValue, SelectByVisibleText) -->
         <select id="category-filter" onchange="filterTable()">
             <option value="all">전체 보기</option>
             <option value="electronics">전자기기</option>
@@ -104,7 +163,8 @@
             <option value="food">식품</option>
         </select>
         
-        <button id="add-item-btn" style="float: right;" onclick="alert('준비 중인 기능입니다.')">
+        <!-- 연습 포인트: 버튼 클릭 시 Modal이 뜨는지 확인 -->
+        <button id="add-item-btn" style="float: right;" onclick="openModal()">
             + 신규 등록
         </button>
     </div>
@@ -121,7 +181,6 @@
             </tr>
         </thead>
         <tbody>
-            <!-- 연습 포인트: 특정 텍스트(예: 게이밍 마우스)를 가진 행의 삭제 버튼 찾기 -->
             <tr data-id="item-101">
                 <td><input type="checkbox" name="item-check" value="101"></td>
                 <td class="product-name">게이밍 마우스</td>
@@ -170,9 +229,43 @@
     </table>
 </div>
 
+<!-- Modal (신규 등록 팝업) HTML -->
+<div id="addItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3>상품 등록</h3>
+        
+        <div class="form-group">
+            <label for="name">상품명</label>
+            <input type="text" id="name" placeholder="상품명 입력">
+        </div>
+
+        <div class="form-group">
+            <label for="price">가격</label>
+            <input type="number" id="price" placeholder="숫자만 입력">
+        </div>
+
+        <div class="form-group">
+            <label for="stock">재고 수량</label>
+            <input type="number" id="stock" placeholder="0">
+        </div>
+
+        <div class="form-group">
+            <label for="category">카테고리</label>
+            <select id="category">
+                <option value="electronics">전자기기</option>
+                <option value="clothing">의류</option>
+                <option value="food">식품</option>
+            </select>
+        </div>
+
+        <button class="btn-save" id="save-btn" onclick="addItem()">등록 완료</button>
+    </div>
+</div>
+
 <script>
+    /* 기존 기능 유지 */
     function deleteItem(btn) {
-        // 연습 포인트: Alert 창 처리 (accept/dismiss)
         if (confirm('정말로 이 항목을 삭제하시겠습니까?')) {
             const row = btn.closest('tr');
             row.remove();
@@ -187,11 +280,84 @@
         console.log("필터 기능은 DOM 구조 변화 연습을 위해 작동하지 않게 설정됨 (필요 시 구현 가능)");
     }
     
-    // 전체 선택 체크박스 로직
     document.getElementById('select-all').addEventListener('change', function(e) {
         const checkboxes = document.getElementsByName('item-check');
         checkboxes.forEach(cb => cb.checked = e.target.checked);
     });
+
+    /* --- 신규 추가된 Modal 및 등록 로직 --- */
+    const modal = document.getElementById("addItemModal");
+
+    function openModal() {
+        modal.style.display = "block";
+        // 포커스 이동 (Selenium sendKeys 연습용)
+        document.getElementById("name").focus();
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+        // 입력 필드 초기화
+        document.getElementById("name").value = "";
+        document.getElementById("price").value = "";
+        document.getElementById("stock").value = "";
+        document.getElementById("category").value = "electronics";
+    }
+
+    // 모달 바깥 영역 클릭 시 닫기
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    function addItem() {
+        const name = document.getElementById("name").value;
+        const price = document.getElementById("price").value;
+        const stock = document.getElementById("stock").value;
+        const categoryVal = document.getElementById("category").value;
+
+        if (!name || !price || !stock) {
+            alert("모든 필드를 입력해주세요.");
+            return;
+        }
+
+        const tableBody = document.querySelector("#product-table tbody");
+        const newRow = document.createElement("tr");
+        
+        // 랜덤 ID 생성
+        const newId = "item-" + Math.floor(Math.random() * 10000);
+        newRow.setAttribute("data-id", newId);
+
+        let badgeClass = "badge-elec";
+        let categoryText = "전자기기";
+        
+        if (categoryVal === 'clothing') {
+            badgeClass = "badge-cloth";
+            categoryText = "의류";
+        } else if (categoryVal === 'food') {
+            badgeClass = "badge-food";
+            categoryText = "식품";
+        }
+
+        const formattedPrice = new Intl.NumberFormat('ko-KR').format(price) + "원";
+
+        newRow.innerHTML = `
+            <td><input type="checkbox" name="item-check" value="${newId}"></td>
+            <td class="product-name">${name}</td>
+            <td>${formattedPrice}</td>
+            <td><input type="text" value="${stock}" style="width: 50px;"></td>
+            <td><span class="badge ${badgeClass}">${categoryText}</span></td>
+            <td>
+                <button class="btn-edit" onclick="editItem('${name}')">수정</button>
+                <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
+            </td>
+        `;
+
+        tableBody.appendChild(newRow);
+        
+        // 추가 완료 후 닫기
+        closeModal();
+    }
 </script>
 
 </body>
