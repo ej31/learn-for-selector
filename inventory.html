@@ -33,23 +33,33 @@
                     <span class="font-bold text-lg tracking-tight">FastTrack <span class="text-blue-400">WMS</span></span>
                 </div>
 
-                <!-- User Profile & Logout -->
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2 text-sm text-slate-300">
-                        <div class="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <span id="welcome-msg">관리자 (Admin)</span>
-                    </div>
-                    <div class="h-6 w-px bg-slate-700"></div>
-                    <a href="index.html" id="logout-btn" class="flex items-center gap-1 text-sm font-medium text-red-400 hover:text-red-300 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        로그아웃
+                <!-- Navigation & User Profile -->
+                <div class="flex items-center gap-6">
+                    <!-- [NEW] 고급 기능 랩 이동 버튼 -->
+                    <a href="advanced.html" class="flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-md transition-all border border-slate-700">
+                        <span class="text-lg">🧪</span>
+                        고급 기능 랩
                     </a>
+
+                    <div class="h-6 w-px bg-slate-700"></div>
+
+                    <!-- User Profile & Logout -->
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2 text-sm text-slate-300">
+                            <div class="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <span id="welcome-msg" class="hidden sm:inline">관리자 (Admin)</span>
+                        </div>
+                        <a href="index.html" id="logout-btn" class="flex items-center gap-1 text-sm font-medium text-red-400 hover:text-red-300 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span class="hidden sm:inline">로그아웃</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,7 +148,7 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Empty State Placeholder (Hidden by default, shown by JS if empty) -->
+                <!-- Empty State Placeholder -->
                 <div id="empty-state" class="hidden p-10 text-center">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -218,7 +228,6 @@
     </div>
 
 <script>
-    // --- 1. 데이터 관리 ---
     const STORAGE_KEY = 'qa_practice_inventory';
     
     const defaultData = [
@@ -273,7 +282,6 @@
         }
     }
 
-    // --- 2. 렌더링 ---
     function renderTable() {
         const tbody = document.getElementById('table-body');
         const emptyState = document.getElementById('empty-state');
@@ -299,7 +307,6 @@
             tr.setAttribute('data-id', item.id);
             tr.className = "hover:bg-blue-50/50 transition-colors group border-b border-slate-100 last:border-b-0";
             
-            // 배지 스타일 개선
             let badgeClass = 'bg-blue-100 text-blue-700 ring-1 ring-blue-600/20';
             let catText = '전자기기';
             let icon = '🔌';
@@ -317,7 +324,6 @@
 
             const formattedPrice = new Intl.NumberFormat('ko-KR').format(item.price);
             
-            // 재고 상태 컬러링
             let stockClass = "text-slate-600 font-medium";
             if (item.stock < 10) stockClass = "text-rose-600 font-bold";
 
@@ -355,13 +361,6 @@
         updateDeleteButtonState();
     }
 
-    function applyFilter() {
-        renderTable();
-        const selectAll = document.getElementById('select-all');
-        if(selectAll) selectAll.checked = false;
-    }
-
-    // --- 3. UI 인터랙션 ---
     function updateDeleteButtonState() {
         const checkboxes = document.querySelectorAll('input[name="item-check"]:checked');
         const deleteBtn = document.getElementById('delete-selected-btn');
@@ -446,7 +445,6 @@
         const category = document.getElementById("category").value;
 
         if (!name || !price || !stock) {
-            // Tailwind Toast를 띄우면 좋겠지만 간단히 Alert 유지
             alert("모든 필드를 올바르게 입력해주세요.");
             return;
         }
@@ -463,7 +461,7 @@
                 };
             }
         } else {
-            const newId = "sku-" + Date.now().toString().slice(-6); // ID 포맷 변경해봄 (SKU 느낌)
+            const newId = "sku-" + Date.now().toString().slice(-6);
             inventoryData.push({
                 id: newId,
                 name,
