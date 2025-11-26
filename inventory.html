@@ -15,13 +15,23 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* 페이드인 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen flex flex-col">
 
     <!-- Top Navigation Bar -->
     <nav class="bg-slate-900 text-white shadow-lg z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- [수정됨] 전체 너비 사용 (w-full) -->
+        <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo & Brand -->
                 <div class="flex items-center gap-3">
@@ -35,7 +45,6 @@
 
                 <!-- Navigation & User Profile -->
                 <div class="flex items-center gap-6">
-                    <!-- [NEW] 고급 기능 랩 이동 버튼 -->
                     <a href="advanced.html" class="flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-md transition-all border border-slate-700">
                         <span class="text-lg">🧪</span>
                         고급 기능 랩
@@ -43,7 +52,6 @@
 
                     <div class="h-6 w-px bg-slate-700"></div>
 
-                    <!-- User Profile & Logout -->
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2 text-sm text-slate-300">
                             <div class="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center">
@@ -67,7 +75,8 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto p-4 sm:p-8">
-        <div class="max-w-7xl mx-auto space-y-6">
+        <!-- [수정됨] 전체 너비 사용 (w-full) -->
+        <div class="w-full px-4 space-y-6">
             
             <!-- Header Section -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -75,8 +84,13 @@
                     <h2 class="text-2xl font-bold text-slate-900">재고 현황 대시보드</h2>
                     <p class="text-sm text-slate-500 mt-1">실시간 물류 입출고 및 재고 상태를 관리합니다.</p>
                 </div>
-                <!-- Action Buttons Group -->
                 <div class="flex items-center gap-3">
+                    <!-- Simulation Status -->
+                    <div class="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold animate-pulse border border-green-200">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        실시간 판매 시뮬레이션 중...
+                    </div>
+
                     <button onclick="resetData()" 
                         class="flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,31 +108,39 @@
                 </div>
             </div>
 
-            <!-- Dashboard Filters & Controls -->
+            <!-- Speed Control Aside -->
+            <aside class="bg-indigo-50 border-l-4 border-indigo-500 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-r-md shadow-sm">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <p class="text-sm text-indigo-700 font-medium">테스트 목적으로 판매 속도를 올릴 수 있습니다.</p>
+                </div>
+                <div class="flex items-center gap-3 bg-white px-3 py-2 rounded-md border border-indigo-100">
+                    <label for="speed-control" class="text-xs font-bold text-indigo-900 uppercase tracking-wide">판매 주기 조절:</label>
+                    <input type="range" id="speed-control" min="100" max="5000" step="100" value="3000" 
+                        class="w-32 h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                        oninput="updateSimulationSpeed(this.value)">
+                    <span id="speed-value" class="text-sm font-mono text-indigo-600 w-12 text-right font-bold">3.0s</span>
+                </div>
+            </aside>
+
+            <!-- Controls -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <div class="relative w-full sm:w-64">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                        </div>
-                        <select id="category-filter" onchange="applyFilter()" 
-                            class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer appearance-none text-slate-700 font-medium">
-                            <option value="all">모든 카테고리 보기</option>
-                            <option value="electronics">📦 전자기기 (Electronics)</option>
-                            <option value="clothing">👕 의류 (Clothing)</option>
-                            <option value="food">🍎 식품 (Food)</option>
-                        </select>
-                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
+                    <label class="text-sm font-bold text-slate-600">카테고리:</label>
+                    <select id="category-filter" onchange="applyFilter()" 
+                        class="block w-full sm:w-64 pl-3 pr-10 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer">
+                        <option value="all">모든 카테고리 보기</option>
+                        <option value="electronics">📦 전자기기 (Electronics)</option>
+                        <option value="clothing">👕 의류 (Clothing)</option>
+                        <option value="food">🍎 식품 (Food)</option>
+                    </select>
                 </div>
 
                 <div class="w-full sm:w-auto flex justify-end">
                     <button id="delete-selected-btn" onclick="deleteSelectedItems()" disabled 
-                        class="flex items-center gap-2 bg-rose-50 text-rose-600 border border-rose-200 px-4 py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 hover:bg-rose-100 hover:border-rose-300">
+                        class="flex items-center gap-2 bg-rose-50 text-rose-600 border border-rose-200 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 hover:bg-rose-100 hover:border-rose-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -127,11 +149,14 @@
                 </div>
             </div>
 
-            <!-- Data Table Card -->
+            <!-- Main Inventory Table -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <h3 class="font-bold text-slate-800">📦 전체 재고 목록</h3>
+                </div>
+                <div class="overflow-x-auto max-h-[400px]">
                     <table id="product-table" class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200 sticky top-0 z-10">
                             <tr>
                                 <th class="p-4 w-14 text-center">
                                     <input type="checkbox" id="select-all" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer transition">
@@ -139,6 +164,7 @@
                                 <th class="p-4">상품명 (Product Name)</th>
                                 <th class="p-4">단가 (Price)</th>
                                 <th class="p-4">재고 (Stock)</th>
+                                <th class="p-4">최소 수량 (Min Stock)</th> <!-- Added Column -->
                                 <th class="p-4">카테고리 (Category)</th>
                                 <th class="p-4 text-right">관리 (Actions)</th>
                             </tr>
@@ -148,16 +174,80 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Empty State Placeholder -->
                 <div id="empty-state" class="hidden p-10 text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-slate-900">데이터가 없습니다</h3>
-                    <p class="text-slate-500 mt-1">신규 상품을 등록하여 재고를 관리하세요.</p>
+                    <p class="text-slate-500">데이터가 없습니다. 신규 상품을 등록하세요.</p>
                 </div>
+            </div>
+
+            <!-- Bottom Grid: Sales Log & Low Stock Alert -->
+            <!-- [수정됨] lg:grid-cols-2 제거하여 항상 세로로 배치되도록 변경 -->
+            <div class="grid grid-cols-1 gap-6">
+                
+                <!-- 1. Real-time Sales Log (Ajax API) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[300px]">
+                    <div class="px-5 py-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <span class="p-1 bg-green-100 text-green-600 rounded">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </span>
+                            실시간 판매 기록 (Live Sales)
+                        </h3>
+                        <span class="text-[10px] text-slate-400">Powered by RandomUser API</span>
+                    </div>
+                    <div class="overflow-y-auto flex-1 p-0" id="sales-log-container">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-slate-50 text-slate-500 font-medium border-b border-slate-200 sticky top-0">
+                                <tr>
+                                    <th class="p-3">시간</th>
+                                    <th class="p-3">상품명</th>
+                                    <th class="p-3">구매자</th>
+                                    <th class="p-3 text-right">상태</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-log-body" class="divide-y divide-slate-100">
+                                <!-- Sales rows injected here -->
+                            </tbody>
+                        </table>
+                        <div id="sales-empty" class="p-8 text-center text-slate-400 text-sm">
+                            판매 대기 중...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Low Stock Alert Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[300px]">
+                    <div class="px-5 py-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <span class="p-1 bg-red-100 text-red-600 rounded animate-pulse">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </span>
+                            재고 부족 알림 (Low Stock)
+                        </h3>
+                    </div>
+                    <div class="overflow-y-auto flex-1 p-0">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-slate-50 text-slate-500 font-medium border-b border-slate-200 sticky top-0">
+                                <tr>
+                                    <th class="p-3">상품명</th>
+                                    <th class="p-3">현재고</th>
+                                    <th class="p-3">설정값</th>
+                                    <th class="p-3 text-right">조치</th>
+                                </tr>
+                            </thead>
+                            <tbody id="low-stock-body" class="divide-y divide-slate-100">
+                                <!-- Low stock rows injected here -->
+                            </tbody>
+                        </table>
+                        <div id="low-stock-empty" class="p-8 text-center text-slate-400 text-sm hidden">
+                            모든 재고가 충분합니다.
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </main>
@@ -212,6 +302,22 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Alert Settings (New) -->
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-bold text-slate-700">재고 경고 설정</label>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="alert-enabled" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="alert-enabled" class="ml-2 text-xs font-medium text-slate-600 cursor-pointer select-none">경고 켜기</label>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label for="min-stock" class="text-xs text-slate-500">최소 유지 수량(N):</label>
+                        <input type="number" id="min-stock" value="10" class="w-20 border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <span class="text-xs text-slate-400">개 미만 시 알림 발생</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Modal Footer -->
@@ -228,13 +334,14 @@
     </div>
 
 <script>
+    // --- 1. 데이터 관리 ---
     const STORAGE_KEY = 'qa_practice_inventory';
     
     const defaultData = [
-        { id: 'item-101', name: 'Logitech G PRO Wireless', price: 169000, stock: 42, category: 'electronics' },
-        { id: 'item-102', name: 'Keychron K8 Pro Keyboard', price: 135000, stock: 15, category: 'electronics' },
-        { id: 'item-201', name: 'FastTrack Logo Hoodie (L)', price: 45000, stock: 120, category: 'clothing' },
-        { id: 'item-301', name: 'Premium Espresso Beans 1kg', price: 25000, stock: 8, category: 'food' }
+        { id: 'item-101', name: 'Logitech G PRO Wireless', price: 169000, stock: 42, category: 'electronics', minStock: 10, alertOn: true },
+        { id: 'item-102', name: 'Keychron K8 Pro Keyboard', price: 135000, stock: 15, category: 'electronics', minStock: 5, alertOn: true },
+        { id: 'item-201', name: 'FastTrack Logo Hoodie (L)', price: 45000, stock: 120, category: 'clothing', minStock: 20, alertOn: false },
+        { id: 'item-301', name: 'Premium Espresso Beans 1kg', price: 25000, stock: 8, category: 'food', minStock: 15, alertOn: true }
     ];
 
     let inventoryData = [];
@@ -242,6 +349,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         loadData();
         renderTable();
+        renderLowStockTable(); // 초기 로드 시 경고 테이블 렌더링
         
         const selectAllCheckbox = document.getElementById('select-all');
         if (selectAllCheckbox) {
@@ -251,12 +359,21 @@
                 updateDeleteButtonState(); 
             });
         }
+
+        // 시뮬레이션 시작
+        startSalesSimulation();
     });
 
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             inventoryData = JSON.parse(stored);
+            // 데이터 마이그레이션 (기존 데이터에 새 필드가 없을 경우 대비)
+            inventoryData = inventoryData.map(item => ({
+                ...item,
+                minStock: item.minStock !== undefined ? item.minStock : 10,
+                alertOn: item.alertOn !== undefined ? item.alertOn : true
+            }));
         } else {
             inventoryData = JSON.parse(JSON.stringify(defaultData)); 
             saveToStorage();
@@ -278,10 +395,16 @@
             if(selectAll) selectAll.checked = false;
 
             renderTable();
+            renderLowStockTable();
+            // 판매 로그 비우기
+            document.getElementById('sales-log-body').innerHTML = '';
+            document.getElementById('sales-empty').classList.remove('hidden');
+            
             alert('데이터가 성공적으로 초기화되었습니다.');
         }
     }
 
+    // --- 2. 메인 인벤토리 렌더링 ---
     function renderTable() {
         const tbody = document.getElementById('table-body');
         const emptyState = document.getElementById('empty-state');
@@ -324,8 +447,22 @@
 
             const formattedPrice = new Intl.NumberFormat('ko-KR').format(item.price);
             
+            // 재고 상태 컬러링 (설정된 MinStock 기준)
             let stockClass = "text-slate-600 font-medium";
-            if (item.stock < 10) stockClass = "text-rose-600 font-bold";
+            let stockWarning = "";
+            if (item.alertOn && item.stock < item.minStock) {
+                stockClass = "text-rose-600 font-bold animate-pulse";
+                stockWarning = "⚠️";
+            } else if (item.stock === 0) {
+                stockClass = "text-red-500 font-bold";
+                stockWarning = " (품절)";
+            }
+
+            // Alert settings display logic
+            let alertDisplay = item.minStock + ' ea';
+            if (!item.alertOn) {
+                alertDisplay += ' <span class="text-xs text-slate-400 ml-1">(Off)</span>';
+            }
 
             tr.innerHTML = `
                 <td class="p-4 text-center">
@@ -341,7 +478,10 @@
                 <td class="p-4 text-slate-600">₩${formattedPrice}</td>
                 <td class="p-4">
                     <span class="${stockClass}">${item.stock}</span> 
-                    <span class="text-xs text-slate-400">ea</span>
+                    <span class="text-xs text-slate-400">ea ${stockWarning}</span>
+                </td>
+                <td class="p-4 text-slate-600 font-medium">
+                    ${alertDisplay}
                 </td>
                 <td class="p-4">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${badgeClass}">
@@ -359,6 +499,134 @@
         });
 
         updateDeleteButtonState();
+    }
+
+    // --- 3. 재고 부족 알림 테이블 렌더링 ---
+    function renderLowStockTable() {
+        const tbody = document.getElementById('low-stock-body');
+        const emptyState = document.getElementById('low-stock-empty');
+        tbody.innerHTML = '';
+
+        const lowStockItems = inventoryData.filter(item => item.alertOn && item.stock < item.minStock);
+
+        if (lowStockItems.length === 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            lowStockItems.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "animate-fade-in border-b border-slate-100 last:border-b-0 bg-red-50/50";
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-slate-700">${item.name}</td>
+                    <td class="p-3 text-red-600 font-bold">${item.stock}</td>
+                    <td class="p-3 text-slate-500">${item.minStock}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="openModal('edit', '${item.id}')" class="text-xs bg-white border border-slate-300 hover:bg-slate-50 px-2 py-1 rounded text-slate-600">발주/수정</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    // --- 4. 실시간 판매 시뮬레이션 & 로그 ---
+    let simulationInterval = null;
+    let currentSpeed = 3000;
+
+    function startSalesSimulation() {
+        if (simulationInterval) clearInterval(simulationInterval);
+
+        simulationInterval = setInterval(() => {
+            // [수정됨] 전체 아이템 중 랜덤 선택 (재고 없는 것도 포함)
+            if (inventoryData.length === 0) return;
+
+            const randomItem = inventoryData[Math.floor(Math.random() * inventoryData.length)];
+            
+            // 재고 확인 및 처리
+            if (randomItem.stock > 0) {
+                // 판매 성공
+                randomItem.stock--;
+                saveToStorage();
+                renderTable();
+                
+                if (randomItem.alertOn && randomItem.stock < randomItem.minStock) {
+                    renderLowStockTable();
+                }
+                
+                fetchRandomUserAndLogSale(randomItem, true); // Success
+            } else {
+                // 판매 실패 (재고 없음) - 로그만 기록
+                fetchRandomUserAndLogSale(randomItem, false); // Fail
+            }
+
+        }, currentSpeed);
+    }
+
+    function updateSimulationSpeed(newSpeed) {
+        currentSpeed = parseInt(newSpeed);
+        document.getElementById('speed-value').innerText = (currentSpeed / 1000).toFixed(1) + 's';
+        startSalesSimulation();
+    }
+
+    function fetchRandomUserAndLogSale(item, isSuccess) {
+        fetch('https://randomuser.me/api/')
+            .then(response => response.json())
+            .then(data => {
+                const user = data.results[0];
+                const userName = `${user.name.first} ${user.name.last}`;
+                const location = `${user.location.city}, ${user.location.country}`;
+                addSalesLog(item.name, userName, location, isSuccess);
+            })
+            .catch(error => {
+                const dummyNames = ["John Doe", "Jane Smith", "Michael Johnson", "Emily Brown"];
+                const dummyLocs = ["New York, USA", "London, UK", "Seoul, KR", "Tokyo, JP"];
+                const randomName = dummyNames[Math.floor(Math.random() * dummyNames.length)];
+                const randomLoc = dummyLocs[Math.floor(Math.random() * dummyLocs.length)];
+                addSalesLog(item.name, randomName, randomLoc, isSuccess);
+            });
+    }
+
+    function addSalesLog(productName, customer, location, isSuccess) {
+        const tbody = document.getElementById('sales-log-body');
+        const emptyState = document.getElementById('sales-empty');
+        emptyState.classList.add('hidden');
+
+        const tr = document.createElement('tr');
+        tr.className = "animate-fade-in border-b border-slate-100 last:border-b-0";
+        
+        const time = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+        let statusBadge = '';
+        if (isSuccess) {
+            statusBadge = '<span class="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">Sold</span>';
+        } else {
+            statusBadge = '<span class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Out of Stock</span>';
+        }
+
+        tr.innerHTML = `
+            <td class="p-3 text-slate-500 font-mono">${time}</td>
+            <td class="p-3 font-medium text-slate-700 truncate max-w-[120px]" title="${productName}">${productName}</td>
+            <td class="p-3 text-slate-600">
+                <div>${customer}</div>
+                <div class="text-[10px] text-slate-400">${location}</div>
+            </td>
+            <td class="p-3 text-right">
+                ${statusBadge}
+            </td>
+        `;
+
+        tbody.insertBefore(tr, tbody.firstChild);
+
+        if (tbody.children.length > 20) {
+            tbody.removeChild(tbody.lastChild);
+        }
+    }
+
+    // --- 5. UI 인터랙션 (기존 유지) ---
+    function applyFilter() {
+        renderTable();
+        const selectAll = document.getElementById('select-all');
+        if(selectAll) selectAll.checked = false;
     }
 
     function updateDeleteButtonState() {
@@ -404,6 +672,9 @@
                 document.getElementById("price").value = item.price;
                 document.getElementById("stock").value = item.stock;
                 document.getElementById("category").value = item.category;
+                // Alert Settings Load
+                document.getElementById("min-stock").value = item.minStock || 10;
+                document.getElementById("alert-enabled").checked = item.alertOn !== false;
             }
         } else {
             modalTitle.innerText = "신규 상품 등록";
@@ -429,6 +700,8 @@
         document.getElementById("price").value = "";
         document.getElementById("stock").value = "";
         document.getElementById("category").value = "electronics";
+        document.getElementById("min-stock").value = "10";
+        document.getElementById("alert-enabled").checked = true;
     }
 
     window.onclick = function(event) {
@@ -443,6 +716,10 @@
         const price = document.getElementById("price").value;
         const stock = document.getElementById("stock").value;
         const category = document.getElementById("category").value;
+        
+        // Alert Settings
+        const minStock = parseInt(document.getElementById("min-stock").value) || 0;
+        const alertOn = document.getElementById("alert-enabled").checked;
 
         if (!name || !price || !stock) {
             alert("모든 필드를 올바르게 입력해주세요.");
@@ -457,7 +734,9 @@
                     name, 
                     price: parseInt(price), 
                     stock: parseInt(stock), 
-                    category 
+                    category,
+                    minStock,
+                    alertOn
                 };
             }
         } else {
@@ -466,13 +745,16 @@
                 id: newId,
                 name,
                 price: parseInt(price), 
-                stock: parseInt(stock),
-                category
+                stock: parseInt(stock), 
+                category,
+                minStock,
+                alertOn
             });
         }
 
         saveToStorage(); 
         renderTable();   
+        renderLowStockTable(); // Update alert table
         closeModal();
     }
 
@@ -481,6 +763,7 @@
             inventoryData = inventoryData.filter(item => item.id !== id);
             saveToStorage();
             renderTable();
+            renderLowStockTable(); // Update alert table
         }
     }
 
@@ -494,6 +777,7 @@
             
             saveToStorage();
             renderTable();
+            renderLowStockTable();
             
             const selectAll = document.getElementById('select-all');
             if(selectAll) selectAll.checked = false;
