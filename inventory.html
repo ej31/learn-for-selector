@@ -411,6 +411,10 @@
         const filterEl = document.getElementById('category-filter');
         
         if (!tbody) return;
+
+        // [수정됨] 렌더링 전 현재 체크된 항목 ID 저장 (상태 유지)
+        const currentCheckedIds = Array.from(document.querySelectorAll('input[name="item-check"]:checked')).map(cb => cb.value);
+
         const filterVal = filterEl ? filterEl.value : 'all'; 
         
         tbody.innerHTML = ''; 
@@ -464,10 +468,13 @@
                 alertDisplay += ' <span class="text-xs text-slate-400 ml-1">(Off)</span>';
             }
 
+            // [수정됨] 저장된 ID 목록에 포함되어 있으면 checked 속성 추가
+            const isChecked = currentCheckedIds.includes(item.id) ? 'checked' : '';
+
             tr.innerHTML = `
                 <td class="p-4 text-center">
                     <input type="checkbox" name="item-check" value="${item.id}" onchange="updateDeleteButtonState()" 
-                    class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                    class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer" ${isChecked}>
                 </td>
                 <td class="p-4">
                     <div class="flex flex-col">
