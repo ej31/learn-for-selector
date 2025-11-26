@@ -3,174 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Practice - Inventory</title>
+    <title>QA Practice - Inventory (Tailwind)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .controls {
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between; /* 양쪽 정렬 */
-            align-items: center;
-        }
-        .control-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #dee2e6;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #343a40;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        /* 버튼 스타일 */
-        button {
-            cursor: pointer;
-            border-radius: 3px;
-            border: none;
-            padding: 6px 12px;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-edit { background-color: #ffc107; color: black; }
-        .btn-delete { background-color: #dc3545; color: white; }
-        .btn-reset { background-color: #6c757d; color: white; } /* 초기화 버튼 */
-        
-        button:hover { opacity: 0.9; }
-
-        /* 비활성화 버튼 스타일 추가 */
-        button:disabled {
-            background-color: #cccccc !important;
-            color: #666666 !important;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .badge {
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            color: white;
-        }
-        .badge-elec { background-color: #17a2b8; }
-        .badge-cloth { background-color: #6610f2; }
-        .badge-food { background-color: #28a745; }
-        
-        #logout-btn {
-            color: #dc3545;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* --- Modal 스타일 --- */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 100; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.5); 
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto; 
-            padding: 25px;
-            border: 1px solid #888;
-            width: 400px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .close-modal {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close-modal:hover {
-            color: black;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .btn-save {
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-        }
+        /* Tailwind로 대체하기 어려운 미세 조정이나 커스텀 스크롤바 등이 필요할 때만 사용 */
+        /* 현재는 순수 Tailwind 클래스로만 구성 */
     </style>
 </head>
-<body>
+<body class="bg-gray-50 font-sans text-gray-800 p-5">
 
-<div class="container">
-    <header>
-        <h2>📦 재고 관리 시스템</h2>
-        <div>
-            <span id="welcome-msg">환영합니다, Admin님</span> | 
-            <a href="index.html" id="logout-btn">로그아웃</a>
+<div class="container max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <header class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
+        <h2 class="text-2xl font-bold text-gray-800">📦 재고 관리 시스템</h2>
+        <div class="text-sm">
+            <span id="welcome-msg" class="text-gray-600 mr-2">환영합니다, Admin님</span>
+            <span class="text-gray-300">|</span>
+            <a href="index.html" id="logout-btn" class="ml-2 text-red-500 hover:text-red-700 font-bold hover:underline">로그아웃</a>
         </div>
     </header>
 
-    <div class="controls">
-        <div class="control-group">
-            <label for="category-filter">카테고리 필터:</label>
-            <select id="category-filter" onchange="applyFilter()">
+    <!-- Controls Area -->
+    <div class="controls bg-gray-100 p-4 rounded-md mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="control-group flex items-center gap-2 w-full sm:w-auto">
+            <label for="category-filter" class="font-semibold text-gray-700 whitespace-nowrap">카테고리 필터:</label>
+            <select id="category-filter" onchange="applyFilter()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                 <option value="all">전체 보기</option>
                 <option value="electronics">전자기기</option>
                 <option value="clothing">의류</option>
@@ -178,66 +35,99 @@
             </select>
         </div>
         
-        <div class="control-group">
+        <div class="control-group flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
             <!-- 초기 상태는 disabled -->
-            <button class="btn-delete" id="delete-selected-btn" onclick="deleteSelectedItems()" disabled>선택 삭제</button>
-            <button class="btn-reset" onclick="resetData()">↻ 데이터 초기화</button>
-            <button id="add-item-btn" class="btn-primary" onclick="openModal('add')">
+            <button id="delete-selected-btn" onclick="deleteSelectedItems()" disabled 
+                class="bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-3 py-2 rounded text-sm transition duration-200 font-medium shadow-sm">
+                선택 삭제
+            </button>
+            <button onclick="resetData()" 
+                class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition duration-200 font-medium shadow-sm">
+                ↻ 초기화
+            </button>
+            <button id="add-item-btn" onclick="openModal('add')" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition duration-200 font-medium shadow-sm flex items-center">
                 + 신규 등록
             </button>
         </div>
     </div>
 
-    <table id="product-table">
-        <thead>
-            <tr>
-                <th><input type="checkbox" id="select-all"></th>
-                <th>상품명</th>
-                <th>가격</th>
-                <th>재고</th>
-                <th>카테고리</th>
-                <th>관리</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-            <!-- 자바스크립트로 데이터가 렌더링 됩니다 -->
-        </tbody>
-    </table>
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table id="product-table" class="w-full border-collapse text-sm">
+            <thead>
+                <tr class="bg-gray-800 text-white">
+                    <th class="p-3 text-left w-12 rounded-tl-md">
+                        <input type="checkbox" id="select-all" class="cursor-pointer rounded text-blue-600 focus:ring-blue-500">
+                    </th>
+                    <th class="p-3 text-left">상품명</th>
+                    <th class="p-3 text-left">가격</th>
+                    <th class="p-3 text-left">재고</th>
+                    <th class="p-3 text-left">카테고리</th>
+                    <th class="p-3 text-left w-40 rounded-tr-md">관리</th>
+                </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-gray-200 border-x border-b border-gray-200">
+                <!-- 자바스크립트로 데이터가 렌더링 됩니다 -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- Modal -->
-<div id="itemModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h3 id="modal-title">상품 등록</h3>
+<!-- Modal (Overlay & Content) -->
+<!-- 'hidden' 클래스로 기본 숨김 처리, JS에서 flex로 변경하여 중앙 정렬 -->
+<div id="itemModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm items-center justify-center">
+    <div class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 relative overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50">
+            <h3 id="modal-title" class="text-lg font-bold text-gray-800">상품 등록</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full p-1 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
         
-        <input type="hidden" id="edit-id">
+        <!-- Body -->
+        <div class="p-6 space-y-4">
+            <input type="hidden" id="edit-id">
 
-        <div class="form-group">
-            <label for="name">상품명</label>
-            <input type="text" id="name" placeholder="상품명 입력">
+            <div class="form-group">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">상품명</label>
+                <input type="text" id="name" placeholder="예: 무선 마우스" 
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+
+            <div class="form-group">
+                <label for="price" class="block text-sm font-medium text-gray-700 mb-1">가격</label>
+                <input type="number" id="price" placeholder="숫자만 입력" 
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+
+            <div class="form-group">
+                <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">재고 수량</label>
+                <input type="number" id="stock" placeholder="0" 
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            </div>
+
+            <div class="form-group">
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                <select id="category" 
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition">
+                    <option value="electronics">전자기기</option>
+                    <option value="clothing">의류</option>
+                    <option value="food">식품</option>
+                </select>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="price">가격</label>
-            <input type="number" id="price" placeholder="숫자만 입력">
+        <!-- Footer -->
+        <div class="p-5 border-t border-gray-100 bg-gray-50">
+            <button id="save-btn" onclick="saveItem()" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded shadow-sm transition duration-200">
+                저장 하기
+            </button>
         </div>
-
-        <div class="form-group">
-            <label for="stock">재고 수량</label>
-            <input type="number" id="stock" placeholder="0">
-        </div>
-
-        <div class="form-group">
-            <label for="category">카테고리</label>
-            <select id="category">
-                <option value="electronics">전자기기</option>
-                <option value="clothing">의류</option>
-                <option value="food">식품</option>
-            </select>
-        </div>
-
-        <button class="btn-save" id="save-btn" onclick="saveItem()">저장 하기</button>
     </div>
 </div>
 
@@ -264,7 +154,7 @@
             selectAllCheckbox.addEventListener('change', function(e) {
                 const checkboxes = document.getElementsByName('item-check');
                 checkboxes.forEach(cb => cb.checked = e.target.checked);
-                updateDeleteButtonState(); // 상태 업데이트 호출
+                updateDeleteButtonState(); 
             });
         }
     });
@@ -314,49 +204,64 @@
             ? inventoryData 
             : inventoryData.filter(item => item.category === filterVal);
 
-        filteredData.forEach(item => {
+        filteredData.forEach((item, index) => {
             const tr = document.createElement('tr');
             tr.setAttribute('data-id', item.id);
+            // 짝수 행 배경색 적용 (Zebra striping)
+            tr.className = index % 2 === 0 ? "bg-white hover:bg-gray-50 transition" : "bg-gray-50 hover:bg-gray-100 transition";
             
-            let badgeClass = 'badge-elec';
+            // Tailwind 배지 스타일 적용
+            let badgeClass = 'bg-cyan-100 text-cyan-800 border border-cyan-200';
             let catText = '전자기기';
-            if (item.category === 'clothing') { badgeClass = 'badge-cloth'; catText = '의류'; }
-            if (item.category === 'food') { badgeClass = 'badge-food'; catText = '식품'; }
+            
+            if (item.category === 'clothing') { 
+                badgeClass = 'bg-purple-100 text-purple-800 border border-purple-200'; 
+                catText = '의류'; 
+            }
+            if (item.category === 'food') { 
+                badgeClass = 'bg-green-100 text-green-800 border border-green-200'; 
+                catText = '식품'; 
+            }
 
             const formattedPrice = new Intl.NumberFormat('ko-KR').format(item.price) + "원";
 
-            // 체크박스에 onchange 이벤트 추가
             tr.innerHTML = `
-                <td><input type="checkbox" name="item-check" value="${item.id}" onchange="updateDeleteButtonState()"></td>
-                <td class="product-name">${item.name}</td>
-                <td>${formattedPrice}</td>
-                <td>${item.stock}</td>
-                <td><span class="badge ${badgeClass}">${catText}</span></td>
-                <td>
-                    <button class="btn-edit" onclick="openModal('edit', '${item.id}')">수정</button>
-                    <button class="btn-delete" onclick="deleteItem('${item.id}')">삭제</button>
+                <td class="p-3 border-b border-gray-200 text-center">
+                    <input type="checkbox" name="item-check" value="${item.id}" onchange="updateDeleteButtonState()" 
+                    class="cursor-pointer rounded text-blue-600 focus:ring-blue-500">
+                </td>
+                <td class="p-3 border-b border-gray-200 product-name font-medium text-gray-700">${item.name}</td>
+                <td class="p-3 border-b border-gray-200 text-gray-600">${formattedPrice}</td>
+                <td class="p-3 border-b border-gray-200 text-gray-600">${item.stock}</td>
+                <td class="p-3 border-b border-gray-200">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}">${catText}</span>
+                </td>
+                <td class="p-3 border-b border-gray-200">
+                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white hover:text-white px-2 py-1 rounded text-xs transition mr-1" 
+                        onclick="openModal('edit', '${item.id}')">수정</button>
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition" 
+                        onclick="deleteItem('${item.id}')">삭제</button>
                 </td>
             `;
             tbody.appendChild(tr);
         });
 
-        // 테이블 렌더링 후 버튼 상태 초기화 (체크박스가 다 풀리므로)
         updateDeleteButtonState();
     }
 
     function applyFilter() {
         renderTable();
-        // 필터링 시 전체선택 해제
         const selectAll = document.getElementById('select-all');
         if(selectAll) selectAll.checked = false;
     }
 
-    // --- 3. 버튼 상태 관리 (신규 기능) ---
+    // --- 3. 버튼 상태 관리 ---
     function updateDeleteButtonState() {
         const checkboxes = document.querySelectorAll('input[name="item-check"]:checked');
         const deleteBtn = document.getElementById('delete-selected-btn');
         if (deleteBtn) {
             deleteBtn.disabled = checkboxes.length === 0;
+            // Tailwind disabled 상태는 클래스로 자동 처리되지만, 필요 시 추가 로직 가능
         }
     }
 
@@ -366,8 +271,11 @@
     const editIdInput = document.getElementById("edit-id");
 
     function openModal(mode, id = null) {
-        if (!modal) return; 
-        modal.style.display = "block";
+        if (!modal) return;
+        
+        // [중요] Tailwind의 'hidden' 클래스를 제거하고 Flexbox를 적용하여 중앙 정렬
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
         
         if (mode === 'edit' && id) {
             modalTitle.innerText = "상품 수정";
@@ -386,13 +294,18 @@
             clearModalInputs();
         }
         
-        const nameInput = document.getElementById("name");
-        if(nameInput) nameInput.focus();
+        // 포커스 이동 시 약간의 지연을 주어 모달이 렌더링 된 후 실행되도록 함
+        setTimeout(() => {
+            const nameInput = document.getElementById("name");
+            if(nameInput) nameInput.focus();
+        }, 50);
     }
 
     function closeModal() {
         if (!modal) return;
-        modal.style.display = "none";
+        // 다시 숨김 처리
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
         clearModalInputs();
     }
 
@@ -403,6 +316,7 @@
         document.getElementById("category").value = "electronics";
     }
 
+    // 배경 클릭 시 닫기
     window.onclick = function(event) {
         if (event.target == modal) {
             closeModal();
@@ -438,7 +352,7 @@
                 id: newId,
                 name,
                 price: parseInt(price),
-                stock: parseInt(stock),
+                stock: parseInt(stock), 
                 category
             });
         }
@@ -458,10 +372,7 @@
 
     function deleteSelectedItems() {
         const checkboxes = document.querySelectorAll('input[name="item-check"]:checked');
-        if (checkboxes.length === 0) {
-            // 버튼이 disabled 되므로 여기는 실행되지 않겠지만 방어 코드 유지
-            return;
-        }
+        if (checkboxes.length === 0) return;
 
         if (confirm(`선택한 ${checkboxes.length}개의 항목을 삭제하시겠습니까?`)) {
             const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
@@ -473,7 +384,6 @@
             const selectAll = document.getElementById('select-all');
             if(selectAll) selectAll.checked = false;
             
-            // 삭제 후 버튼 상태 업데이트
             updateDeleteButtonState();
         }
     }
