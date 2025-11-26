@@ -32,6 +32,14 @@
             padding: 10px;
             background-color: #e9ecef;
             border-radius: 4px;
+            display: flex;
+            justify-content: space-between; /* 양쪽 정렬 */
+            align-items: center;
+        }
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
         table {
             width: 100%;
@@ -51,21 +59,20 @@
             background-color: #f2f2f2;
         }
         /* 버튼 스타일 */
-        .btn-edit {
-            background-color: #ffc107;
-            border: none;
-            padding: 5px 10px;
+        button {
             cursor: pointer;
             border-radius: 3px;
-        }
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
             border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 3px;
+            padding: 6px 12px;
+            font-size: 14px;
         }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-edit { background-color: #ffc107; color: black; }
+        .btn-delete { background-color: #dc3545; color: white; }
+        .btn-reset { background-color: #6c757d; color: white; } /* 초기화 버튼 */
+        
+        button:hover { opacity: 0.9; }
+
         .badge {
             padding: 3px 8px;
             border-radius: 12px;
@@ -82,9 +89,9 @@
             font-weight: bold;
         }
 
-        /* --- Modal (신규 등록 팝업) 스타일 추가 --- */
+        /* --- Modal 스타일 --- */
         .modal {
-            display: none; /* 기본 숨김 */
+            display: none; 
             position: fixed; 
             z-index: 100; 
             left: 0;
@@ -92,7 +99,7 @@
             width: 100%; 
             height: 100%; 
             overflow: auto; 
-            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            background-color: rgba(0,0,0,0.5); 
         }
         .modal-content {
             background-color: #fefefe;
@@ -138,9 +145,6 @@
             font-size: 16px;
             cursor: pointer;
         }
-        .btn-save:hover {
-            background-color: #218838;
-        }
     </style>
 </head>
 <body>
@@ -155,18 +159,23 @@
     </header>
 
     <div class="controls">
-        <label for="category-filter">카테고리 필터:</label>
-        <select id="category-filter" onchange="filterTable()">
-            <option value="all">전체 보기</option>
-            <option value="electronics">전자기기</option>
-            <option value="clothing">의류</option>
-            <option value="food">식품</option>
-        </select>
+        <div class="control-group">
+            <label for="category-filter">카테고리 필터:</label>
+            <select id="category-filter" onchange="applyFilter()">
+                <option value="all">전체 보기</option>
+                <option value="electronics">전자기기</option>
+                <option value="clothing">의류</option>
+                <option value="food">식품</option>
+            </select>
+        </div>
         
-        <!-- 연습 포인트: 버튼 클릭 시 Modal이 뜨는지 확인 -->
-        <button id="add-item-btn" style="float: right;" onclick="openModal()">
-            + 신규 등록
-        </button>
+        <div class="control-group">
+            <!-- 상태 초기화 버튼 (테스트용) -->
+            <button class="btn-reset" onclick="resetData()">↻ 데이터 초기화</button>
+            <button id="add-item-btn" class="btn-primary" onclick="openModal('add')">
+                + 신규 등록
+            </button>
+        </div>
     </div>
 
     <table id="product-table">
@@ -180,61 +189,21 @@
                 <th>관리</th>
             </tr>
         </thead>
-        <tbody>
-            <tr data-id="item-101">
-                <td><input type="checkbox" name="item-check" value="101"></td>
-                <td class="product-name">게이밍 마우스</td>
-                <td>55,000원</td>
-                <td><input type="text" value="12" style="width: 50px;"></td>
-                <td><span class="badge badge-elec">전자기기</span></td>
-                <td>
-                    <button class="btn-edit" onclick="editItem('게이밍 마우스')">수정</button>
-                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
-                </td>
-            </tr>
-            <tr data-id="item-102">
-                <td><input type="checkbox" name="item-check" value="102"></td>
-                <td class="product-name">기계식 키보드</td>
-                <td>125,000원</td>
-                <td><input type="text" value="5" style="width: 50px;"></td>
-                <td><span class="badge badge-elec">전자기기</span></td>
-                <td>
-                    <button class="btn-edit" onclick="editItem('기계식 키보드')">수정</button>
-                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
-                </td>
-            </tr>
-            <tr data-id="item-201">
-                <td><input type="checkbox" name="item-check" value="201"></td>
-                <td class="product-name">후드 티셔츠</td>
-                <td>35,000원</td>
-                <td><input type="text" value="50" style="width: 50px;"></td>
-                <td><span class="badge badge-cloth">의류</span></td>
-                <td>
-                    <button class="btn-edit" onclick="editItem('후드 티셔츠')">수정</button>
-                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
-                </td>
-            </tr>
-             <tr data-id="item-301">
-                <td><input type="checkbox" name="item-check" value="301"></td>
-                <td class="product-name">유기농 커피빈</td>
-                <td>15,000원</td>
-                <td><input type="text" value="20" style="width: 50px;"></td>
-                <td><span class="badge badge-food">식품</span></td>
-                <td>
-                    <button class="btn-edit" onclick="editItem('유기농 커피빈')">수정</button>
-                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
-                </td>
-            </tr>
+        <tbody id="table-body">
+            <!-- 자바스크립트로 데이터가 렌더링 됩니다 -->
         </tbody>
     </table>
 </div>
 
-<!-- Modal (신규 등록 팝업) HTML -->
-<div id="addItemModal" class="modal">
+<!-- Modal -->
+<div id="itemModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h3>상품 등록</h3>
+        <h3 id="modal-title">상품 등록</h3>
         
+        <!-- 수정 시 ID 식별을 위한 히든 필드 -->
+        <input type="hidden" id="edit-id">
+
         <div class="form-group">
             <label for="name">상품명</label>
             <input type="text" id="name" placeholder="상품명 입력">
@@ -259,105 +228,200 @@
             </select>
         </div>
 
-        <button class="btn-save" id="save-btn" onclick="addItem()">등록 완료</button>
+        <button class="btn-save" id="save-btn" onclick="saveItem()">저장 하기</button>
     </div>
 </div>
 
 <script>
-    /* 기존 기능 유지 */
-    function deleteItem(btn) {
-        if (confirm('정말로 이 항목을 삭제하시겠습니까?')) {
-            const row = btn.closest('tr');
-            row.remove();
+    // --- 1. 데이터 관리 (상태 저장) ---
+    const STORAGE_KEY = 'qa_practice_inventory';
+    
+    // 초기 기본 데이터
+    const defaultData = [
+        { id: 'item-101', name: '게이밍 마우스', price: 55000, stock: 12, category: 'electronics' },
+        { id: 'item-102', name: '기계식 키보드', price: 125000, stock: 5, category: 'electronics' },
+        { id: 'item-201', name: '후드 티셔츠', price: 35000, stock: 50, category: 'clothing' },
+        { id: 'item-301', name: '유기농 커피빈', price: 15000, stock: 20, category: 'food' }
+    ];
+
+    let inventoryData = [];
+
+    // 페이지 로드 시 실행
+    window.onload = function() {
+        loadData();
+        renderTable();
+    };
+
+    function loadData() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            inventoryData = JSON.parse(stored);
+        } else {
+            inventoryData = JSON.parse(JSON.stringify(defaultData)); // Deep copy
+            saveToStorage();
         }
     }
 
-    function editItem(name) {
-        alert(name + ' 수정 모드 (구현 예정)');
+    function saveToStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(inventoryData));
     }
 
-    function filterTable() {
-        console.log("필터 기능은 DOM 구조 변화 연습을 위해 작동하지 않게 설정됨 (필요 시 구현 가능)");
+    function resetData() {
+        if(confirm('데이터를 초기 상태로 되돌리시겠습니까? 모든 변경사항이 사라집니다.')) {
+            localStorage.removeItem(STORAGE_KEY);
+            loadData();
+            renderTable();
+            document.getElementById('category-filter').value = 'all';
+            alert('데이터가 초기화되었습니다.');
+        }
     }
-    
-    document.getElementById('select-all').addEventListener('change', function(e) {
-        const checkboxes = document.getElementsByName('item-check');
-        checkboxes.forEach(cb => cb.checked = e.target.checked);
-    });
 
-    /* --- 신규 추가된 Modal 및 등록 로직 --- */
-    const modal = document.getElementById("addItemModal");
+    // --- 2. 렌더링 및 필터링 ---
+    function renderTable() {
+        const tbody = document.getElementById('table-body');
+        const filterVal = document.getElementById('category-filter').value;
+        
+        tbody.innerHTML = ''; // 기존 내용 비우기
 
-    function openModal() {
+        // 필터링 로직
+        const filteredData = filterVal === 'all' 
+            ? inventoryData 
+            : inventoryData.filter(item => item.category === filterVal);
+
+        filteredData.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-id', item.id);
+            
+            let badgeClass = 'badge-elec';
+            let catText = '전자기기';
+            if (item.category === 'clothing') { badgeClass = 'badge-cloth'; catText = '의류'; }
+            if (item.category === 'food') { badgeClass = 'badge-food'; catText = '식품'; }
+
+            const formattedPrice = new Intl.NumberFormat('ko-KR').format(item.price) + "원";
+
+            tr.innerHTML = `
+                <td><input type="checkbox" name="item-check" value="${item.id}"></td>
+                <td class="product-name">${item.name}</td>
+                <td>${formattedPrice}</td>
+                <td>${item.stock}</td> <!-- 재고 표시 방식 단순화 -->
+                <td><span class="badge ${badgeClass}">${catText}</span></td>
+                <td>
+                    <button class="btn-edit" onclick="openModal('edit', '${item.id}')">수정</button>
+                    <button class="btn-delete" onclick="deleteItem('${item.id}')">삭제</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function applyFilter() {
+        renderTable();
+    }
+
+    // --- 3. 모달 및 CRUD 기능 ---
+    const modal = document.getElementById("itemModal");
+    const modalTitle = document.getElementById("modal-title");
+    const editIdInput = document.getElementById("edit-id");
+
+    // 모달 열기 (등록/수정 공용)
+    function openModal(mode, id = null) {
         modal.style.display = "block";
-        // 포커스 이동 (Selenium sendKeys 연습용)
+        
+        if (mode === 'edit' && id) {
+            modalTitle.innerText = "상품 수정";
+            editIdInput.value = id;
+            
+            // 기존 데이터 채워넣기
+            const item = inventoryData.find(i => i.id === id);
+            if (item) {
+                document.getElementById("name").value = item.name;
+                document.getElementById("price").value = item.price;
+                document.getElementById("stock").value = item.stock;
+                document.getElementById("category").value = item.category;
+            }
+        } else {
+            modalTitle.innerText = "상품 등록";
+            editIdInput.value = ""; // ID가 없으면 신규 등록
+            clearModalInputs();
+        }
+        
         document.getElementById("name").focus();
     }
 
     function closeModal() {
         modal.style.display = "none";
-        // 입력 필드 초기화
+        clearModalInputs();
+    }
+
+    function clearModalInputs() {
         document.getElementById("name").value = "";
         document.getElementById("price").value = "";
         document.getElementById("stock").value = "";
         document.getElementById("category").value = "electronics";
     }
 
-    // 모달 바깥 영역 클릭 시 닫기
     window.onclick = function(event) {
         if (event.target == modal) {
             closeModal();
         }
     }
 
-    function addItem() {
+    // 아이템 저장 (신규 등록 및 수정 처리)
+    function saveItem() {
+        const id = editIdInput.value;
         const name = document.getElementById("name").value;
         const price = document.getElementById("price").value;
         const stock = document.getElementById("stock").value;
-        const categoryVal = document.getElementById("category").value;
+        const category = document.getElementById("category").value;
 
         if (!name || !price || !stock) {
             alert("모든 필드를 입력해주세요.");
             return;
         }
 
-        const tableBody = document.querySelector("#product-table tbody");
-        const newRow = document.createElement("tr");
-        
-        // 랜덤 ID 생성
-        const newId = "item-" + Math.floor(Math.random() * 10000);
-        newRow.setAttribute("data-id", newId);
-
-        let badgeClass = "badge-elec";
-        let categoryText = "전자기기";
-        
-        if (categoryVal === 'clothing') {
-            badgeClass = "badge-cloth";
-            categoryText = "의류";
-        } else if (categoryVal === 'food') {
-            badgeClass = "badge-food";
-            categoryText = "식품";
+        if (id) {
+            // 수정 모드: 기존 배열에서 찾아 업데이트
+            const index = inventoryData.findIndex(item => item.id === id);
+            if (index !== -1) {
+                inventoryData[index] = { 
+                    id, 
+                    name, 
+                    price: parseInt(price), 
+                    stock: parseInt(stock), 
+                    category 
+                };
+            }
+        } else {
+            // 신규 등록 모드
+            const newId = "item-" + Date.now(); // 타임스탬프로 고유 ID 생성
+            inventoryData.push({
+                id: newId,
+                name,
+                price: parseInt(price),
+                stock: parseInt(stock),
+                category
+            });
         }
 
-        const formattedPrice = new Intl.NumberFormat('ko-KR').format(price) + "원";
-
-        newRow.innerHTML = `
-            <td><input type="checkbox" name="item-check" value="${newId}"></td>
-            <td class="product-name">${name}</td>
-            <td>${formattedPrice}</td>
-            <td><input type="text" value="${stock}" style="width: 50px;"></td>
-            <td><span class="badge ${badgeClass}">${categoryText}</span></td>
-            <td>
-                <button class="btn-edit" onclick="editItem('${name}')">수정</button>
-                <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
-            </td>
-        `;
-
-        tableBody.appendChild(newRow);
-        
-        // 추가 완료 후 닫기
+        saveToStorage(); // 영구 저장
+        renderTable();   // 화면 갱신
         closeModal();
     }
+
+    // 삭제 기능
+    function deleteItem(id) {
+        if (confirm('정말로 이 항목을 삭제하시겠습니까?')) {
+            inventoryData = inventoryData.filter(item => item.id !== id);
+            saveToStorage();
+            renderTable();
+        }
+    }
+
+    // 전체 선택 체크박스
+    document.getElementById('select-all').addEventListener('change', function(e) {
+        const checkboxes = document.getElementsByName('item-check');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
 </script>
 
 </body>
