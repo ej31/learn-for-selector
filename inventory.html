@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Practice - Inventory</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .controls {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #343a40;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        /* 버튼 스타일 */
+        .btn-edit {
+            background-color: #ffc107;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: white;
+        }
+        .badge-elec { background-color: #17a2b8; }
+        .badge-cloth { background-color: #6610f2; }
+        .badge-food { background-color: #28a745; }
+        
+        #logout-btn {
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>📦 재고 관리 시스템</h2>
+        <div>
+            <span id="welcome-msg">환영합니다, Admin님</span> | 
+            <a href="index.html" id="logout-btn">로그아웃</a>
+        </div>
+    </header>
+
+    <div class="controls">
+        <label for="category-filter">카테고리 필터:</label>
+        <!-- 연습 포인트: Select 클래스 사용 (SelectByValue, SelectByVisibleText) -->
+        <select id="category-filter" onchange="filterTable()">
+            <option value="all">전체 보기</option>
+            <option value="electronics">전자기기</option>
+            <option value="clothing">의류</option>
+            <option value="food">식품</option>
+        </select>
+        
+        <button id="add-item-btn" style="float: right;" onclick="alert('준비 중인 기능입니다.')">
+            + 신규 등록
+        </button>
+    </div>
+
+    <table id="product-table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>상품명</th>
+                <th>가격</th>
+                <th>재고</th>
+                <th>카테고리</th>
+                <th>관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 연습 포인트: 특정 텍스트(예: 게이밍 마우스)를 가진 행의 삭제 버튼 찾기 -->
+            <tr data-id="item-101">
+                <td><input type="checkbox" name="item-check" value="101"></td>
+                <td class="product-name">게이밍 마우스</td>
+                <td>55,000원</td>
+                <td><input type="text" value="12" style="width: 50px;"></td>
+                <td><span class="badge badge-elec">전자기기</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editItem('게이밍 마우스')">수정</button>
+                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
+                </td>
+            </tr>
+            <tr data-id="item-102">
+                <td><input type="checkbox" name="item-check" value="102"></td>
+                <td class="product-name">기계식 키보드</td>
+                <td>125,000원</td>
+                <td><input type="text" value="5" style="width: 50px;"></td>
+                <td><span class="badge badge-elec">전자기기</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editItem('기계식 키보드')">수정</button>
+                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
+                </td>
+            </tr>
+            <tr data-id="item-201">
+                <td><input type="checkbox" name="item-check" value="201"></td>
+                <td class="product-name">후드 티셔츠</td>
+                <td>35,000원</td>
+                <td><input type="text" value="50" style="width: 50px;"></td>
+                <td><span class="badge badge-cloth">의류</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editItem('후드 티셔츠')">수정</button>
+                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
+                </td>
+            </tr>
+             <tr data-id="item-301">
+                <td><input type="checkbox" name="item-check" value="301"></td>
+                <td class="product-name">유기농 커피빈</td>
+                <td>15,000원</td>
+                <td><input type="text" value="20" style="width: 50px;"></td>
+                <td><span class="badge badge-food">식품</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editItem('유기농 커피빈')">수정</button>
+                    <button class="btn-delete" onclick="deleteItem(this)">삭제</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function deleteItem(btn) {
+        // 연습 포인트: Alert 창 처리 (accept/dismiss)
+        if (confirm('정말로 이 항목을 삭제하시겠습니까?')) {
+            const row = btn.closest('tr');
+            row.remove();
+        }
+    }
+
+    function editItem(name) {
+        alert(name + ' 수정 모드 (구현 예정)');
+    }
+
+    function filterTable() {
+        console.log("필터 기능은 DOM 구조 변화 연습을 위해 작동하지 않게 설정됨 (필요 시 구현 가능)");
+    }
+    
+    // 전체 선택 체크박스 로직
+    document.getElementById('select-all').addEventListener('change', function(e) {
+        const checkboxes = document.getElementsByName('item-check');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+</script>
+
+</body>
+</html>
