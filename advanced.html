@@ -26,8 +26,17 @@
             -webkit-animation: spin 1s linear infinite;
             animation: spin 1s linear infinite;
         }
+        
+        /* 페이드인 애니메이션 (자동 추가 시 효과) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
 
-        /* [NEW] 날짜 선택기 UI 개선 */
+        /* 날짜 선택기 UI 개선 */
         #datepicker {
             position: relative;
         }
@@ -87,6 +96,26 @@
                     QA 테스트 모드 활성화됨
                 </div>
             </header>
+
+            <!-- [NEW] Defect Generation Speed Control Aside -->
+            <aside class="bg-rose-50 border-l-4 border-rose-500 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-r-md shadow-sm mb-6">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <div class="flex flex-col">
+                        <p class="text-sm text-rose-700 font-bold">자동 반품 접수 시뮬레이션</p>
+                        <p class="text-xs text-rose-600">테스트 목적으로 불량/반품 접수 생성 속도를 조절할 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 bg-white px-3 py-2 rounded-md border border-rose-100">
+                    <label for="defect-speed-control" class="text-xs font-bold text-rose-900 uppercase tracking-wide">생성 주기:</label>
+                    <input type="range" id="defect-speed-control" min="1000" max="5000" step="100" value="3000" 
+                        class="w-32 h-2 bg-rose-200 rounded-lg appearance-none cursor-pointer accent-rose-600"
+                        oninput="updateDefectSpeed(this.value)">
+                    <span id="defect-speed-value" class="text-sm font-mono text-rose-600 w-12 text-right font-bold">3.0s</span>
+                </div>
+            </aside>
 
             <!-- Dashboard Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -217,7 +246,6 @@
                 </div>
 
                 <!-- 3. 재고 실사 일정 (Reservation CRUD Table) -->
-                <!-- [Layout Change] Use full width (col-span-2) -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2">
                     <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2">
@@ -230,14 +258,12 @@
                         </h3>
                         <!-- Button Group -->
                         <div class="flex gap-2">
-                            <!-- [NEW] Reset Button -->
                             <button onclick="resetReservations()" class="bg-slate-200 hover:bg-slate-300 text-slate-600 text-xs px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                                 데이터 초기화
                             </button>
-                            <!-- Add Button -->
                             <button onclick="openResModal('add')" class="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -247,7 +273,6 @@
                         </div>
                     </div>
                     <div class="p-0 overflow-x-auto">
-                        <!-- Table -->
                         <table class="w-full text-sm text-left">
                             <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
                                 <tr>
@@ -263,10 +288,47 @@
                                 <!-- JS Injected Rows -->
                             </tbody>
                         </table>
-                        
-                        <!-- Empty State -->
                         <div id="res-empty" class="hidden p-8 text-center text-slate-500">
                             예약된 실사 일정이 없습니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- [NEW] 불량/반품 접수 관리 (Radio Button CRUD) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <span class="p-1.5 bg-rose-100 text-rose-600 rounded-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </span>
+                            불량/반품 접수 관리 (Radio & State Change)
+                        </h3>
+                        <button onclick="openDefectModal('add')" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            반품 접수
+                        </button>
+                    </div>
+                    <div class="p-0 overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 w-28">접수번호</th>
+                                    <th class="p-4">상품명</th>
+                                    <th class="p-4">사유 (Type)</th>
+                                    <th class="p-4">처리 상태</th>
+                                    <th class="p-4 text-right">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="defect-table-body" class="divide-y divide-slate-100">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                        <div id="defect-empty" class="hidden p-8 text-center text-slate-500">
+                            접수된 불량/반품 건이 없습니다.
                         </div>
                     </div>
                 </div>
@@ -288,7 +350,6 @@
                         </div>
                     </div>
                     <div class="p-6 space-y-6">
-                        <!-- ... (생략: 기존 운영 가이드 내용) ... -->
                         <!-- Tooltip Area -->
                         <div class="flex items-start gap-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                             <div class="flex-1">
@@ -329,133 +390,123 @@
         </div>
     </main>
 
-    <!-- Reservation Modal (Existing Code) -->
-    <!-- ... -->
+    <!-- Reservation Modal -->
     <div id="reservationModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all animate-[fadeIn_0.2s_ease-out] border border-slate-200">
-            <!-- Modal Header -->
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <h3 id="res-modal-title" class="text-lg font-bold text-slate-800">실사 일정 등록</h3>
                 <button onclick="closeResModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full p-1 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
-            
-            <!-- Modal Body -->
             <div class="p-6 space-y-5">
                 <input type="hidden" id="res-edit-id">
-
-                <!-- Date Picker -->
                 <div>
                     <label for="datepicker" class="block text-sm font-semibold text-slate-700 mb-1">실사 예정일 <span class="text-orange-500 text-xs font-normal">(Input Locked)</span></label>
                     <p class="text-xs text-slate-500 mb-2">키보드 입력이 금지되어 있습니다. 달력 위젯을 사용하여 선택하세요.</p>
                     <div class="relative">
-                        <input type="date" id="datepicker" onkeydown="return false"
-                            class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 text-slate-600 cursor-pointer">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
+                        <input type="date" id="datepicker" onkeydown="return false" class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 text-slate-600 cursor-pointer">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                     </div>
                 </div>
-
-                <!-- Type -->
                 <div class="form-group">
                     <label for="res-type" class="block text-sm font-semibold text-slate-700 mb-1.5">실사 구분</label>
-                    <select id="res-type" 
-                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-shadow appearance-none">
-                        <option value="Regular">정기 실사 (Regular)</option>
-                        <option value="Spot">수시 실사 (Spot)</option>
-                        <option value="YearEnd">연말 실사 (Year-End)</option>
-                    </select>
+                    <select id="res-type" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-shadow appearance-none"><option value="Regular">정기 실사 (Regular)</option><option value="Spot">수시 실사 (Spot)</option><option value="YearEnd">연말 실사 (Year-End)</option></select>
                 </div>
-
-                <!-- Manager -->
                 <div class="form-group">
                     <label for="res-manager" class="block text-sm font-semibold text-slate-700 mb-1.5">담당자</label>
-                    <input type="text" id="res-manager" placeholder="예: 홍길동" 
-                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow">
+                    <input type="text" id="res-manager" placeholder="예: 홍길동" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow">
                 </div>
-
-                <!-- Status -->
                 <div class="form-group flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
                     <input type="checkbox" id="res-completed" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer">
                     <label for="res-completed" class="text-sm font-medium text-slate-700 cursor-pointer select-none">실사 완료 처리 (Inspection Completed)</label>
                 </div>
-
-                <!-- Memo -->
                 <div class="form-group">
                     <label for="res-memo" class="block text-sm font-semibold text-slate-700 mb-1.5">비고 / 메모</label>
-                    <textarea id="res-memo" rows="3" placeholder="특이사항이나 메모를 입력하세요."
-                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow resize-none"></textarea>
+                    <textarea id="res-memo" rows="3" placeholder="특이사항이나 메모를 입력하세요." class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow resize-none"></textarea>
                 </div>
             </div>
-
-            <!-- Modal Footer -->
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-                <button onclick="closeResModal()" class="flex-1 bg-white border border-slate-300 text-slate-700 font-medium py-2.5 rounded-lg hover:bg-slate-50 transition-colors">
-                    취소
+                <button onclick="closeResModal()" class="flex-1 bg-white border border-slate-300 text-slate-700 font-medium py-2.5 rounded-lg hover:bg-slate-50 transition-colors">취소</button>
+                <button onclick="saveReservation()" class="flex-[2] bg-orange-600 hover:bg-orange-700 text-white font-medium py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Defect/Return Modal -->
+    <div id="defectModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all animate-[fadeIn_0.2s_ease-out] border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 id="def-modal-title" class="text-lg font-bold text-slate-800">불량/반품 접수</h3>
+                <button onclick="closeDefectModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full p-1 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-                <button onclick="saveReservation()" 
-                    class="flex-[2] bg-orange-600 hover:bg-orange-700 text-white font-medium py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all">
-                    저장
-                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <input type="hidden" id="def-edit-id">
+                <!-- Product Name -->
+                <div>
+                    <label for="def-item" class="block text-sm font-semibold text-slate-700 mb-1.5">대상 상품명</label>
+                    <input type="text" id="def-item" placeholder="상품명을 입력하세요" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-shadow">
+                </div>
+                <!-- Radio Buttons Group (Key for QA Practice) -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">접수 유형 (Radio Group)</label>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="radio" id="type-damage" name="defect-type" value="파손 (Damaged)" class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 cursor-pointer">
+                            <label for="type-damage" class="ml-2 block text-sm text-slate-700 cursor-pointer">파손 (Damaged)</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="type-wrong" name="defect-type" value="오배송 (Wrong Item)" class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 cursor-pointer">
+                            <label for="type-wrong" class="ml-2 block text-sm text-slate-700 cursor-pointer">오배송 (Wrong Item)</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="type-change" name="defect-type" value="변심 반품 (Simple Change)" class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 cursor-pointer">
+                            <label for="type-change" class="ml-2 block text-sm text-slate-700 cursor-pointer">변심 반품 (Simple Change)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <button onclick="closeDefectModal()" class="flex-1 bg-white border border-slate-300 text-slate-700 font-medium py-2.5 rounded-lg hover:bg-slate-50 transition-colors">취소</button>
+                <button onclick="saveDefect()" class="flex-[2] bg-rose-600 hover:bg-rose-700 text-white font-medium py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all">접수 등록</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ... (Existing Async Load & Upload functions omitted for brevity but kept in file) ...
+        // ... (Existing Async Load & Upload Logic Omitted for brevity but preserved) ...
         function loadOrders() {
             const btn = document.getElementById('btn-load-orders');
             const placeholder = document.getElementById('placeholder-text');
             const loader = document.getElementById('loader');
             const list = document.getElementById('order-list');
-
             list.innerHTML = '';
             list.classList.add('hidden');
             placeholder.classList.add('hidden');
             loader.classList.remove('hidden');
-            
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
             const originalBtnText = btn.innerHTML;
             btn.innerHTML = `<div class="loader ease-linear rounded-full border-2 border-t-2 border-white h-4 w-4 mr-2"></div> 처리 중...`;
-
             setTimeout(() => {
                 loader.classList.add('hidden');
                 list.classList.remove('hidden');
-                
                 const orders = [
                     { id: 'URG-2023-8821', item: '전동 지게차 배터리팩 B-Type', dest: '부산 허브', status: '출고 대기' },
                     { id: 'URG-2023-8822', item: '고정밀 센서 모듈 (파손주의)', dest: '인천 공항', status: '패킹 중' },
                     { id: 'URG-2023-8823', item: '긴급 의료용품 키트', dest: '서울 병원', status: '차량 배차' }
                 ];
-
                 orders.forEach(ord => {
                     const div = document.createElement('div');
                     div.className = "flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm order-item hover:border-indigo-300 transition-colors";
-                    
                     let statusColor = 'bg-orange-100 text-orange-700';
                     if(ord.status === '출고 대기') statusColor = 'bg-red-100 text-red-700';
                     if(ord.status === '차량 배차') statusColor = 'bg-green-100 text-green-700';
-
-                    div.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="font-bold text-slate-800 text-sm">${ord.id}</span>
-                            <span class="text-xs text-slate-500">${ord.item}</span>
-                        </div>
-                        <div class="text-right">
-                             <div class="text-xs text-slate-400 mb-1">${ord.dest}</div>
-                             <span class="text-[10px] font-bold px-2 py-0.5 rounded ${statusColor}">${ord.status}</span>
-                        </div>
-                    `;
+                    div.innerHTML = `<div class="flex flex-col"><span class="font-bold text-slate-800 text-sm">${ord.id}</span><span class="text-xs text-slate-500">${ord.item}</span></div><div class="text-right"><div class="text-xs text-slate-400 mb-1">${ord.dest}</div><span class="text-[10px] font-bold px-2 py-0.5 rounded ${statusColor}">${ord.status}</span></div>`;
                     list.appendChild(div);
                 });
-
                 btn.disabled = false;
                 btn.classList.remove('opacity-75', 'cursor-not-allowed');
                 btn.innerHTML = originalBtnText;
@@ -467,7 +518,6 @@
             const previewBox = document.getElementById('preview-box');
             const previewImg = document.getElementById('preview-img');
             const placeholder = document.getElementById('upload-placeholder');
-
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -483,22 +533,18 @@
             const btn = document.getElementById('btn-upload');
             const checkbox = document.getElementById('force-fail-check');
             const fileInput = document.getElementById('file-upload');
-
             if (fileInput.files.length === 0) {
                 showToast("파일을 선택해주세요.", "error");
                 return;
             }
-            
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
             const originalText = btn.innerHTML;
             btn.innerHTML = `<div class="loader ease-linear rounded-full border-2 border-t-2 border-white h-4 w-4 mr-2"></div> 업로드 중...`;
-
             setTimeout(() => {
                 btn.disabled = false;
                 btn.classList.remove('opacity-75', 'cursor-not-allowed');
                 btn.innerHTML = originalText;
-
                 if (checkbox.checked) {
                     showToast("업로드 실패: 서버 연결 시간이 초과되었습니다.", "error");
                 } else {
@@ -510,22 +556,9 @@
         function showToast(message, type) {
             const toast = document.createElement('div');
             const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
-            const icon = type === 'error' ? 
-                `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>` : 
-                `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
-
+            const icon = type === 'error' ? `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>` : `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
             toast.className = `fixed bottom-5 right-5 flex items-center w-full max-w-xs p-4 mb-4 text-white ${bgColor} rounded-lg shadow-lg transition-all duration-300 ease-in-out opacity-0 transform translate-y-2 z-50`;
-            toast.innerHTML = `
-                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-white/20">
-                    ${icon}
-                </div>
-                <div class="ml-3 text-sm font-normal">${message}</div>
-                <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white/20 text-white hover:text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-white/30 inline-flex h-8 w-8" onclick="this.parentElement.remove()">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-            `;
-
+            toast.innerHTML = `<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-white/20">${icon}</div><div class="ml-3 text-sm font-normal">${message}</div><button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white/20 text-white hover:text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-white/30 inline-flex h-8 w-8" onclick="this.parentElement.remove()"><span class="sr-only">Close</span><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button>`;
             document.body.appendChild(toast);
             requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'translate-y-2'); });
             setTimeout(() => {
@@ -534,10 +567,9 @@
             }, 5000);
         }
 
-        // --- 3. Reservation CRUD Logic ---
+        // --- Reservation CRUD Logic ---
         const RES_STORAGE_KEY = 'qa_practice_reservations';
         let reservationData = [];
-        
         const defaultResData = [
             { id: 'RES-001', date: '2025-12-01', type: 'Regular', manager: '김철수', completed: true, memo: '1구역 전수 조사 완료' },
             { id: 'RES-002', date: '2025-12-15', type: 'Spot', manager: '이영희', completed: false, memo: '' }
@@ -546,72 +578,40 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadReservations();
             renderReservationsTable();
+            // [NEW] Load Defects & Start Simulation
+            loadDefects();
+            renderDefectsTable();
+            startDefectSimulation();
         });
 
         function loadReservations() {
             const stored = localStorage.getItem(RES_STORAGE_KEY);
-            if (stored) {
-                reservationData = JSON.parse(stored);
-            } else {
-                reservationData = JSON.parse(JSON.stringify(defaultResData));
-                saveReservationsToStorage();
-            }
+            if (stored) { reservationData = JSON.parse(stored); } 
+            else { reservationData = JSON.parse(JSON.stringify(defaultResData)); saveReservationsToStorage(); }
         }
-
-        function saveReservationsToStorage() {
-            localStorage.setItem(RES_STORAGE_KEY, JSON.stringify(reservationData));
-        }
-
-        // [NEW] Reset Function
+        function saveReservationsToStorage() { localStorage.setItem(RES_STORAGE_KEY, JSON.stringify(reservationData)); }
         function resetReservations() {
-            // 사용자 확인 절차 추가
             if (confirm("테스트 목적으로 만들어진 기능입니다. 이 버튼을 누르면 데이터가 초기 상태로 돌아갑니다. 진행하시겠나요?")) {
                 localStorage.removeItem(RES_STORAGE_KEY);
-                loadReservations(); // Reloads default data
+                loadReservations();
                 renderReservationsTable();
                 showToast("데이터가 초기화되었습니다.", "success");
             }
         }
-
         function renderReservationsTable() {
             const tbody = document.getElementById('res-table-body');
             const emptyState = document.getElementById('res-empty');
-            
             tbody.innerHTML = '';
-            
-            if (reservationData.length === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-            }
-
+            if (reservationData.length === 0) { emptyState.classList.remove('hidden'); } 
+            else { emptyState.classList.add('hidden'); }
             reservationData.forEach(res => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0";
-                
-                let typeBadge = '';
-                if(res.type === 'Regular') typeBadge = '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">정기 실사</span>';
-                else if(res.type === 'Spot') typeBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-medium">수시 실사</span>';
-                else typeBadge = '<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium">연말 실사</span>';
-
-                let statusBadge = res.completed 
-                    ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">완료</span>'
-                    : '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium">예정</span>';
-
+                let typeBadge = res.type === 'Regular' ? '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">정기 실사</span>' : res.type === 'Spot' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-medium">수시 실사</span>' : '<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium">연말 실사</span>';
+                let statusBadge = res.completed ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">완료</span>' : '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium">예정</span>';
                 let memoText = res.memo || '-';
                 if (memoText.length > 15) memoText = memoText.substring(0, 15) + '...';
-
-                tr.innerHTML = `
-                    <td class="p-4 text-slate-700 font-medium">${res.date}</td>
-                    <td class="p-4">${typeBadge}</td>
-                    <td class="p-4 text-slate-600">${res.manager}</td>
-                    <td class="p-4">${statusBadge}</td>
-                    <td class="p-4 text-slate-500 text-xs" title="${res.memo || ''}">${memoText}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="openResModal('edit', '${res.id}')" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3">수정</button>
-                        <button onclick="deleteReservation('${res.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">삭제</button>
-                    </td>
-                `;
+                tr.innerHTML = `<td class="p-4 text-slate-700 font-medium">${res.date}</td><td class="p-4">${typeBadge}</td><td class="p-4 text-slate-600">${res.manager}</td><td class="p-4">${statusBadge}</td><td class="p-4 text-slate-500 text-xs" title="${res.memo || ''}">${memoText}</td><td class="p-4 text-right"><button onclick="openResModal('edit', '${res.id}')" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3">수정</button><button onclick="deleteReservation('${res.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">삭제</button></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -619,15 +619,12 @@
         const resModal = document.getElementById("reservationModal");
         const resModalTitle = document.getElementById("res-modal-title");
         const resEditIdInput = document.getElementById("res-edit-id");
-
         function openResModal(mode, id = null) {
             resModal.classList.remove("hidden");
             resModal.classList.add("flex");
-            
             if (mode === 'edit' && id) {
                 resModalTitle.innerText = "실사 일정 수정";
                 resEditIdInput.value = id;
-                
                 const item = reservationData.find(i => i.id === id);
                 if (item) {
                     document.getElementById("datepicker").value = item.date;
@@ -646,12 +643,7 @@
                 document.getElementById("res-memo").value = "";
             }
         }
-
-        function closeResModal() {
-            resModal.classList.add("hidden");
-            resModal.classList.remove("flex");
-        }
-
+        function closeResModal() { resModal.classList.add("hidden"); resModal.classList.remove("flex"); }
         function saveReservation() {
             const id = resEditIdInput.value;
             const date = document.getElementById("datepicker").value;
@@ -659,29 +651,19 @@
             const manager = document.getElementById("res-manager").value;
             const completed = document.getElementById("res-completed").checked;
             const memo = document.getElementById("res-memo").value;
-
-            if (!date || !manager) {
-                showToast("날짜와 담당자를 모두 입력해주세요.", "error");
-                return;
-            }
-
+            if (!date || !manager) { showToast("날짜와 담당자를 모두 입력해주세요.", "error"); return; }
             if (id) {
                 const index = reservationData.findIndex(item => item.id === id);
-                if (index !== -1) {
-                    reservationData[index] = { id, date, type, manager, completed, memo };
-                    showToast("일정이 수정되었습니다.", "success");
-                }
+                if (index !== -1) { reservationData[index] = { id, date, type, manager, completed, memo }; showToast("일정이 수정되었습니다.", "success"); }
             } else {
                 const newId = "RES-" + Date.now().toString().slice(-6);
                 reservationData.push({ id: newId, date, type, manager, completed, memo });
                 showToast("새로운 실사 일정이 등록되었습니다.", "success");
             }
-
             saveReservationsToStorage();
             renderReservationsTable();
             closeResModal();
         }
-
         function deleteReservation(id) {
             if (confirm('이 실사 일정을 삭제하시겠습니까?')) {
                 reservationData = reservationData.filter(item => item.id !== id);
@@ -691,10 +673,133 @@
             }
         }
 
-        window.onclick = function(event) {
-            if (event.target == resModal) {
-                closeResModal();
+        // --- [NEW] Defect/Return Logic (With Simulation) ---
+        const DEF_STORAGE_KEY = 'qa_practice_defects';
+        let defectData = [];
+        const defectModal = document.getElementById("defectModal");
+        
+        // Simulation Variables
+        let defectSimulationInterval = null;
+        let currentDefectSpeed = 3000;
+
+        function loadDefects() {
+            const stored = localStorage.getItem(DEF_STORAGE_KEY);
+            if (stored) { defectData = JSON.parse(stored); }
+            else { defectData = []; }
+        }
+        function saveDefectsToStorage() { localStorage.setItem(DEF_STORAGE_KEY, JSON.stringify(defectData)); }
+        
+        // [NEW] Automatic Defect Generation
+        function startDefectSimulation() {
+            if (defectSimulationInterval) clearInterval(defectSimulationInterval);
+            
+            defectSimulationInterval = setInterval(() => {
+                const items = ["Logitech G PRO Wireless", "Keychron K8 Pro", "FastTrack Hoodie", "Espresso Beans", "USB-C Cable", "Monitor Stand"];
+                const types = ["파손 (Damaged)", "오배송 (Wrong Item)", "변심 반품 (Simple Change)"];
+                
+                const randomItem = items[Math.floor(Math.random() * items.length)];
+                const randomType = types[Math.floor(Math.random() * types.length)];
+                const newId = "RMA-" + Date.now().toString().slice(-6);
+                
+                defectData.push({ id: newId, item: randomItem, type: randomType, status: 'Pending' });
+                
+                // Keep latest 50 records
+                if (defectData.length > 50) {
+                    defectData.shift();
+                }
+                
+                saveDefectsToStorage();
+                renderDefectsTable();
+            }, currentDefectSpeed);
+        }
+
+        // [NEW] Speed Control Function
+        function updateDefectSpeed(newSpeed) {
+            currentDefectSpeed = parseInt(newSpeed);
+            document.getElementById('defect-speed-value').innerText = (currentDefectSpeed / 1000).toFixed(1) + 's';
+            startDefectSimulation();
+        }
+
+        function renderDefectsTable() {
+            const tbody = document.getElementById('defect-table-body');
+            const empty = document.getElementById('defect-empty');
+            tbody.innerHTML = '';
+            if(defectData.length === 0) { empty.classList.remove('hidden'); }
+            else { empty.classList.add('hidden'); }
+
+            // Show latest first
+            const displayedData = [...defectData].reverse();
+
+            displayedData.forEach(def => {
+                const tr = document.createElement('tr');
+                tr.className = "animate-fade-in hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0";
+                
+                let statusBadge = def.status === 'Approved' ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">승인 완료</span>' : '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">승인 대기</span>';
+                let approveBtn = def.status === 'Pending' ? `<button onclick="approveDefect('${def.id}')" class="text-green-600 hover:text-green-800 text-xs font-bold mr-3">승인</button>` : `<span class="text-xs text-gray-400 mr-3 cursor-not-allowed">승인됨</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-4 text-slate-700 font-mono text-xs">${def.id}</td>
+                    <td class="p-4 font-medium text-slate-800">${def.item}</td>
+                    <td class="p-4 text-slate-600 text-xs">${def.type}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-right">
+                        ${approveBtn}
+                        <button onclick="deleteDefect('${def.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openDefectModal() {
+            defectModal.classList.remove("hidden");
+            defectModal.classList.add("flex");
+            document.getElementById("def-item").value = "";
+            // Reset Radio
+            const radios = document.getElementsByName("defect-type");
+            radios.forEach(r => r.checked = false);
+            if(radios.length > 0) radios[0].checked = true;
+        }
+        function closeDefectModal() { defectModal.classList.add("hidden"); defectModal.classList.remove("flex"); }
+
+        function saveDefect() {
+            const item = document.getElementById("def-item").value;
+            const typeRadio = document.querySelector('input[name="defect-type"]:checked');
+            
+            if(!item) { showToast("상품명을 입력해주세요.", "error"); return; }
+            
+            const type = typeRadio ? typeRadio.value : "기타";
+            const newId = "RMA-" + Date.now().toString().slice(-6);
+            
+            defectData.push({ id: newId, item, type, status: 'Pending' });
+            saveDefectsToStorage();
+            renderDefectsTable();
+            closeDefectModal();
+            showToast("반품 접수가 등록되었습니다.", "success");
+        }
+
+        function approveDefect(id) {
+            const idx = defectData.findIndex(d => d.id === id);
+            if(idx !== -1) {
+                defectData[idx].status = 'Approved';
+                saveDefectsToStorage();
+                renderDefectsTable();
+                showToast("승인 처리되었습니다.", "success");
             }
+        }
+
+        function deleteDefect(id) {
+            if(confirm("정말 삭제하시겠습니까?")) {
+                defectData = defectData.filter(d => d.id !== id);
+                saveDefectsToStorage();
+                renderDefectsTable();
+                showToast("삭제되었습니다.", "success");
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == resModal) closeResModal();
+            if (event.target == defectModal) closeDefectModal();
         }
     </script>
 
