@@ -26,6 +26,22 @@
             -webkit-animation: spin 1s linear infinite;
             animation: spin 1s linear infinite;
         }
+
+        /* [NEW] 날짜 선택기 UI 개선 */
+        #datepicker {
+            position: relative;
+        }
+        #datepicker::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0; /* 투명하게 숨김 */
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen flex flex-col">
@@ -137,6 +153,7 @@
                     <div class="p-6">
                         <p class="text-sm text-slate-500 mb-4">파손되거나 오입고된 상품의 사진 또는 거래명세서를 스캔하여 첨부하세요.</p>
                         
+                        <!-- Upload Box -->
                         <div class="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100 transition relative">
                             <!-- Preview Image Area -->
                             <div id="preview-box" class="w-full h-48 mb-4 hidden rounded-lg overflow-hidden border border-slate-200 bg-white">
@@ -158,11 +175,50 @@
                                 <p class="text-xs text-slate-500 mt-1">PNG, JPG, GIF up to 5MB</p>
                             </div>
                         </div>
+
+                        <!-- Test Helper & Submit Button -->
+                        <div class="mt-6 space-y-4">
+                            <!-- Aside / Note -->
+                            <aside class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-yellow-800 font-medium">테스트 자동화 가이드</p>
+                                        <p class="text-xs text-yellow-700 mt-1">
+                                            테스트를 위해 <span class="font-bold">'이 체크박스를 누른 상태로 제출을 누르면 테스트를 실패합니다'</span>를 만들었습니다. 
+                                            자동화 테스트 코드를 작성할 때 <span class="font-bold">성공</span> 및 <span class="font-bold">실패</span> 두 케이스를 모두 반영하세요.
+                                        </p>
+                                    </div>
+                                </div>
+                            </aside>
+
+                            <!-- Failure Checkbox -->
+                            <div class="flex items-center p-2 bg-slate-50 rounded border border-slate-100">
+                                <input id="force-fail-check" type="checkbox" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded cursor-pointer">
+                                <label for="force-fail-check" class="ml-2 block text-sm text-slate-700 font-medium cursor-pointer">
+                                    강제 실패 모드 (Simulate Upload Error)
+                                </label>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button id="btn-upload" onclick="uploadFile()" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded-lg shadow-sm transition flex justify-center items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                증빙 자료 제출
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- 3. 재고 실사 일정 (Date Picker) -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <!-- 3. 재고 실사 일정 (Reservation CRUD Table) -->
+                <!-- [Layout Change] Use full width (col-span-2) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2">
                     <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2">
                             <span class="p-1.5 bg-orange-100 text-orange-600 rounded-md">
@@ -170,30 +226,53 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </span>
-                            월간 재고 실사 예약 (Read-only Date)
+                            월간 재고 실사 예약 (CRUD)
                         </h3>
-                        <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded">Read-only</span>
+                        <!-- Button Group -->
+                        <div class="flex gap-2">
+                            <!-- [NEW] Reset Button -->
+                            <button onclick="resetReservations()" class="bg-slate-200 hover:bg-slate-300 text-slate-600 text-xs px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                데이터 초기화
+                            </button>
+                            <!-- Add Button -->
+                            <button onclick="openResModal('add')" class="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                일정 등록
+                            </button>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <p class="text-sm text-slate-500 mb-4">재고 실사 예정일은 시스템 정책상 키보드 입력이 금지되어 있습니다. (달력 위젯 사용)</p>
+                    <div class="p-0 overflow-x-auto">
+                        <!-- Table -->
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 w-28">예정일</th>
+                                    <th class="p-4">구분</th>
+                                    <th class="p-4">담당자</th>
+                                    <th class="p-4">상태</th>
+                                    <th class="p-4">비고</th>
+                                    <th class="p-4 text-right">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="res-table-body" class="divide-y divide-slate-100">
+                                <!-- JS Injected Rows -->
+                            </tbody>
+                        </table>
                         
-                        <div class="relative">
-                            <label for="datepicker" class="block text-sm font-semibold text-slate-700 mb-1">실사 예정일 지정</label>
-                            <div class="relative">
-                                <input type="date" id="datepicker" readonly 
-                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 text-slate-600 cursor-pointer">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                            </div>
+                        <!-- Empty State -->
+                        <div id="res-empty" class="hidden p-8 text-center text-slate-500">
+                            예약된 실사 일정이 없습니다.
                         </div>
                     </div>
                 </div>
 
                 <!-- 4. 운영 가이드 및 정책 (Tooltip & New Window) -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2">
                     <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2">
                             <span class="p-1.5 bg-blue-100 text-blue-600 rounded-md">
@@ -209,7 +288,7 @@
                         </div>
                     </div>
                     <div class="p-6 space-y-6">
-                        
+                        <!-- ... (생략: 기존 운영 가이드 내용) ... -->
                         <!-- Tooltip Area -->
                         <div class="flex items-start gap-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                             <div class="flex-1">
@@ -234,7 +313,7 @@
                         <!-- New Window Link -->
                         <div>
                             <p class="text-sm text-slate-600 mb-2 font-medium">서비스 이용 약관 및 개인정보 처리방침</p>
-                            <!-- [UPDATED] Link to Terms Page -->
+                            <!-- Link to Terms Page -->
                             <a href="terms.html" target="_blank" id="btn-link-terms" class="flex items-center justify-between w-full p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition group">
                                 <span class="text-sm text-slate-700 group-hover:text-indigo-600 font-medium">약관 전문 보기 (새 탭)</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,32 +329,106 @@
         </div>
     </main>
 
+    <!-- Reservation Modal (Existing Code) -->
+    <!-- ... -->
+    <div id="reservationModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all animate-[fadeIn_0.2s_ease-out] border border-slate-200">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 id="res-modal-title" class="text-lg font-bold text-slate-800">실사 일정 등록</h3>
+                <button onclick="closeResModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full p-1 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5">
+                <input type="hidden" id="res-edit-id">
+
+                <!-- Date Picker -->
+                <div>
+                    <label for="datepicker" class="block text-sm font-semibold text-slate-700 mb-1">실사 예정일 <span class="text-orange-500 text-xs font-normal">(Input Locked)</span></label>
+                    <p class="text-xs text-slate-500 mb-2">키보드 입력이 금지되어 있습니다. 달력 위젯을 사용하여 선택하세요.</p>
+                    <div class="relative">
+                        <input type="date" id="datepicker" onkeydown="return false"
+                            class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 text-slate-600 cursor-pointer">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Type -->
+                <div class="form-group">
+                    <label for="res-type" class="block text-sm font-semibold text-slate-700 mb-1.5">실사 구분</label>
+                    <select id="res-type" 
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-shadow appearance-none">
+                        <option value="Regular">정기 실사 (Regular)</option>
+                        <option value="Spot">수시 실사 (Spot)</option>
+                        <option value="YearEnd">연말 실사 (Year-End)</option>
+                    </select>
+                </div>
+
+                <!-- Manager -->
+                <div class="form-group">
+                    <label for="res-manager" class="block text-sm font-semibold text-slate-700 mb-1.5">담당자</label>
+                    <input type="text" id="res-manager" placeholder="예: 홍길동" 
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow">
+                </div>
+
+                <!-- Status -->
+                <div class="form-group flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <input type="checkbox" id="res-completed" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer">
+                    <label for="res-completed" class="text-sm font-medium text-slate-700 cursor-pointer select-none">실사 완료 처리 (Inspection Completed)</label>
+                </div>
+
+                <!-- Memo -->
+                <div class="form-group">
+                    <label for="res-memo" class="block text-sm font-semibold text-slate-700 mb-1.5">비고 / 메모</label>
+                    <textarea id="res-memo" rows="3" placeholder="특이사항이나 메모를 입력하세요."
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <button onclick="closeResModal()" class="flex-1 bg-white border border-slate-300 text-slate-700 font-medium py-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+                    취소
+                </button>
+                <button onclick="saveReservation()" 
+                    class="flex-[2] bg-orange-600 hover:bg-orange-700 text-white font-medium py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all">
+                    저장
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // 1. Async Loading Logic
+        // ... (Existing Async Load & Upload functions omitted for brevity but kept in file) ...
         function loadOrders() {
             const btn = document.getElementById('btn-load-orders');
             const placeholder = document.getElementById('placeholder-text');
             const loader = document.getElementById('loader');
             const list = document.getElementById('order-list');
 
-            // Reset UI
             list.innerHTML = '';
             list.classList.add('hidden');
             placeholder.classList.add('hidden');
             loader.classList.remove('hidden');
             
-            // Disable Button
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
             const originalBtnText = btn.innerHTML;
             btn.innerHTML = `<div class="loader ease-linear rounded-full border-2 border-t-2 border-white h-4 w-4 mr-2"></div> 처리 중...`;
 
-            // Simulate Network Delay (3 seconds)
             setTimeout(() => {
                 loader.classList.add('hidden');
                 list.classList.remove('hidden');
                 
-                // Add Dummy Data (More realistic logistics data)
                 const orders = [
                     { id: 'URG-2023-8821', item: '전동 지게차 배터리팩 B-Type', dest: '부산 허브', status: '출고 대기' },
                     { id: 'URG-2023-8822', item: '고정밀 센서 모듈 (파손주의)', dest: '인천 공항', status: '패킹 중' },
@@ -303,14 +456,12 @@
                     list.appendChild(div);
                 });
 
-                // Re-enable Button
                 btn.disabled = false;
                 btn.classList.remove('opacity-75', 'cursor-not-allowed');
                 btn.innerHTML = originalBtnText;
             }, 3000);
         }
 
-        // 2. File Upload Preview Logic
         document.getElementById('file-upload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             const previewBox = document.getElementById('preview-box');
@@ -327,6 +478,224 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        function uploadFile() {
+            const btn = document.getElementById('btn-upload');
+            const checkbox = document.getElementById('force-fail-check');
+            const fileInput = document.getElementById('file-upload');
+
+            if (fileInput.files.length === 0) {
+                showToast("파일을 선택해주세요.", "error");
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<div class="loader ease-linear rounded-full border-2 border-t-2 border-white h-4 w-4 mr-2"></div> 업로드 중...`;
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btn.innerHTML = originalText;
+
+                if (checkbox.checked) {
+                    showToast("업로드 실패: 서버 연결 시간이 초과되었습니다.", "error");
+                } else {
+                    showToast("업로드 성공: 파일이 안전하게 저장되었습니다.", "success");
+                }
+            }, 3000);
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+            const icon = type === 'error' ? 
+                `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>` : 
+                `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+
+            toast.className = `fixed bottom-5 right-5 flex items-center w-full max-w-xs p-4 mb-4 text-white ${bgColor} rounded-lg shadow-lg transition-all duration-300 ease-in-out opacity-0 transform translate-y-2 z-50`;
+            toast.innerHTML = `
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-white/20">
+                    ${icon}
+                </div>
+                <div class="ml-3 text-sm font-normal">${message}</div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white/20 text-white hover:text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-white/30 inline-flex h-8 w-8" onclick="this.parentElement.remove()">
+                    <span class="sr-only">Close</span>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </button>
+            `;
+
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'translate-y-2'); });
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => { if(toast.parentElement) toast.remove(); }, 300);
+            }, 5000);
+        }
+
+        // --- 3. Reservation CRUD Logic ---
+        const RES_STORAGE_KEY = 'qa_practice_reservations';
+        let reservationData = [];
+        
+        const defaultResData = [
+            { id: 'RES-001', date: '2025-12-01', type: 'Regular', manager: '김철수', completed: true, memo: '1구역 전수 조사 완료' },
+            { id: 'RES-002', date: '2025-12-15', type: 'Spot', manager: '이영희', completed: false, memo: '' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReservations();
+            renderReservationsTable();
+        });
+
+        function loadReservations() {
+            const stored = localStorage.getItem(RES_STORAGE_KEY);
+            if (stored) {
+                reservationData = JSON.parse(stored);
+            } else {
+                reservationData = JSON.parse(JSON.stringify(defaultResData));
+                saveReservationsToStorage();
+            }
+        }
+
+        function saveReservationsToStorage() {
+            localStorage.setItem(RES_STORAGE_KEY, JSON.stringify(reservationData));
+        }
+
+        // [NEW] Reset Function
+        function resetReservations() {
+            // 사용자 확인 절차 추가
+            if (confirm("테스트 목적으로 만들어진 기능입니다. 이 버튼을 누르면 데이터가 초기 상태로 돌아갑니다. 진행하시겠나요?")) {
+                localStorage.removeItem(RES_STORAGE_KEY);
+                loadReservations(); // Reloads default data
+                renderReservationsTable();
+                showToast("데이터가 초기화되었습니다.", "success");
+            }
+        }
+
+        function renderReservationsTable() {
+            const tbody = document.getElementById('res-table-body');
+            const emptyState = document.getElementById('res-empty');
+            
+            tbody.innerHTML = '';
+            
+            if (reservationData.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            reservationData.forEach(res => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0";
+                
+                let typeBadge = '';
+                if(res.type === 'Regular') typeBadge = '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">정기 실사</span>';
+                else if(res.type === 'Spot') typeBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-medium">수시 실사</span>';
+                else typeBadge = '<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium">연말 실사</span>';
+
+                let statusBadge = res.completed 
+                    ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">완료</span>'
+                    : '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium">예정</span>';
+
+                let memoText = res.memo || '-';
+                if (memoText.length > 15) memoText = memoText.substring(0, 15) + '...';
+
+                tr.innerHTML = `
+                    <td class="p-4 text-slate-700 font-medium">${res.date}</td>
+                    <td class="p-4">${typeBadge}</td>
+                    <td class="p-4 text-slate-600">${res.manager}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-slate-500 text-xs" title="${res.memo || ''}">${memoText}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="openResModal('edit', '${res.id}')" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3">수정</button>
+                        <button onclick="deleteReservation('${res.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        const resModal = document.getElementById("reservationModal");
+        const resModalTitle = document.getElementById("res-modal-title");
+        const resEditIdInput = document.getElementById("res-edit-id");
+
+        function openResModal(mode, id = null) {
+            resModal.classList.remove("hidden");
+            resModal.classList.add("flex");
+            
+            if (mode === 'edit' && id) {
+                resModalTitle.innerText = "실사 일정 수정";
+                resEditIdInput.value = id;
+                
+                const item = reservationData.find(i => i.id === id);
+                if (item) {
+                    document.getElementById("datepicker").value = item.date;
+                    document.getElementById("res-type").value = item.type;
+                    document.getElementById("res-manager").value = item.manager;
+                    document.getElementById("res-completed").checked = item.completed || false;
+                    document.getElementById("res-memo").value = item.memo || '';
+                }
+            } else {
+                resModalTitle.innerText = "실사 일정 등록";
+                resEditIdInput.value = ""; 
+                document.getElementById("datepicker").value = "";
+                document.getElementById("res-type").value = "Regular";
+                document.getElementById("res-manager").value = "";
+                document.getElementById("res-completed").checked = false;
+                document.getElementById("res-memo").value = "";
+            }
+        }
+
+        function closeResModal() {
+            resModal.classList.add("hidden");
+            resModal.classList.remove("flex");
+        }
+
+        function saveReservation() {
+            const id = resEditIdInput.value;
+            const date = document.getElementById("datepicker").value;
+            const type = document.getElementById("res-type").value;
+            const manager = document.getElementById("res-manager").value;
+            const completed = document.getElementById("res-completed").checked;
+            const memo = document.getElementById("res-memo").value;
+
+            if (!date || !manager) {
+                showToast("날짜와 담당자를 모두 입력해주세요.", "error");
+                return;
+            }
+
+            if (id) {
+                const index = reservationData.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    reservationData[index] = { id, date, type, manager, completed, memo };
+                    showToast("일정이 수정되었습니다.", "success");
+                }
+            } else {
+                const newId = "RES-" + Date.now().toString().slice(-6);
+                reservationData.push({ id: newId, date, type, manager, completed, memo });
+                showToast("새로운 실사 일정이 등록되었습니다.", "success");
+            }
+
+            saveReservationsToStorage();
+            renderReservationsTable();
+            closeResModal();
+        }
+
+        function deleteReservation(id) {
+            if (confirm('이 실사 일정을 삭제하시겠습니까?')) {
+                reservationData = reservationData.filter(item => item.id !== id);
+                saveReservationsToStorage();
+                renderReservationsTable();
+                showToast("일정이 삭제되었습니다.", "success");
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == resModal) {
+                closeResModal();
+            }
+        }
     </script>
 
 </body>
