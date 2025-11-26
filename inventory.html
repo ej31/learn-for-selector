@@ -515,7 +515,8 @@
             emptyState.classList.add('hidden');
             lowStockItems.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = "animate-fade-in border-b border-slate-100 last:border-b-0 bg-red-50/50";
+                // [수정됨] 고속 테스트 시 렌더링 지연을 방지하기 위해 'animate-fade-in' 클래스 제거
+                tr.className = "border-b border-slate-100 last:border-b-0 bg-red-50/50";
                 tr.innerHTML = `
                     <td class="p-3 font-medium text-slate-700">${item.name}</td>
                     <td class="p-3 text-red-600 font-bold">${item.stock}</td>
@@ -592,7 +593,8 @@
         emptyState.classList.add('hidden');
 
         const tr = document.createElement('tr');
-        tr.className = "animate-fade-in border-b border-slate-100 last:border-b-0";
+        // [수정됨] 고속 테스트 시 렌더링 지연(큐잉 현상)을 방지하기 위해 'animate-fade-in' 클래스 제거
+        tr.className = "border-b border-slate-100 last:border-b-0";
         
         const time = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
