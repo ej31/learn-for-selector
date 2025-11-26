@@ -3,143 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Practice - Inventory (Tailwind)</title>
+    <title>패스트트랙 물류센터 - 재고 관리 대시보드</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Tailwind로 대체하기 어려운 미세 조정이나 커스텀 스크롤바 등이 필요할 때만 사용 */
-        /* 현재는 순수 Tailwind 클래스로만 구성 */
+        body { font-family: 'Inter', sans-serif; }
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800 p-5">
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col">
 
-<div class="container max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md">
-    <header class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
-        <h2 class="text-2xl font-bold text-gray-800">📦 재고 관리 시스템</h2>
-        <div class="text-sm">
-            <span id="welcome-msg" class="text-gray-600 mr-2">환영합니다, Admin님</span>
-            <span class="text-gray-300">|</span>
-            <a href="index.html" id="logout-btn" class="ml-2 text-red-500 hover:text-red-700 font-bold hover:underline">로그아웃</a>
-        </div>
-    </header>
+    <!-- Top Navigation Bar -->
+    <nav class="bg-slate-900 text-white shadow-lg z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-600 p-1.5 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <span class="font-bold text-lg tracking-tight">FastTrack <span class="text-blue-400">WMS</span></span>
+                </div>
 
-    <!-- Controls Area -->
-    <div class="controls bg-gray-100 p-4 rounded-md mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div class="control-group flex items-center gap-2 w-full sm:w-auto">
-            <label for="category-filter" class="font-semibold text-gray-700 whitespace-nowrap">카테고리 필터:</label>
-            <select id="category-filter" onchange="applyFilter()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                <option value="all">전체 보기</option>
-                <option value="electronics">전자기기</option>
-                <option value="clothing">의류</option>
-                <option value="food">식품</option>
-            </select>
+                <!-- User Profile & Logout -->
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 text-sm text-slate-300">
+                        <div class="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <span id="welcome-msg">관리자 (Admin)</span>
+                    </div>
+                    <div class="h-6 w-px bg-slate-700"></div>
+                    <a href="index.html" id="logout-btn" class="flex items-center gap-1 text-sm font-medium text-red-400 hover:text-red-300 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        로그아웃
+                    </a>
+                </div>
+            </div>
         </div>
-        
-        <div class="control-group flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
-            <!-- 초기 상태는 disabled -->
-            <button id="delete-selected-btn" onclick="deleteSelectedItems()" disabled 
-                class="bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-3 py-2 rounded text-sm transition duration-200 font-medium shadow-sm">
-                선택 삭제
-            </button>
-            <button onclick="resetData()" 
-                class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition duration-200 font-medium shadow-sm">
-                ↻ 초기화
-            </button>
-            <button id="add-item-btn" onclick="openModal('add')" 
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition duration-200 font-medium shadow-sm flex items-center">
-                + 신규 등록
-            </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+            
+            <!-- Header Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">재고 현황 대시보드</h2>
+                    <p class="text-sm text-slate-500 mt-1">실시간 물류 입출고 및 재고 상태를 관리합니다.</p>
+                </div>
+                <!-- Action Buttons Group -->
+                <div class="flex items-center gap-3">
+                    <button onclick="resetData()" 
+                        class="flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        데이터 초기화
+                    </button>
+                    <button id="add-item-btn" onclick="openModal('add')" 
+                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all transform active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        신규 상품 등록
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Filters & Controls -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                        </div>
+                        <select id="category-filter" onchange="applyFilter()" 
+                            class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer appearance-none text-slate-700 font-medium">
+                            <option value="all">모든 카테고리 보기</option>
+                            <option value="electronics">📦 전자기기 (Electronics)</option>
+                            <option value="clothing">👕 의류 (Clothing)</option>
+                            <option value="food">🍎 식품 (Food)</option>
+                        </select>
+                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full sm:w-auto flex justify-end">
+                    <button id="delete-selected-btn" onclick="deleteSelectedItems()" disabled 
+                        class="flex items-center gap-2 bg-rose-50 text-rose-600 border border-rose-200 px-4 py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 hover:bg-rose-100 hover:border-rose-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        선택 항목 삭제
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Table Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table id="product-table" class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="p-4 w-14 text-center">
+                                    <input type="checkbox" id="select-all" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer transition">
+                                </th>
+                                <th class="p-4">상품명 (Product Name)</th>
+                                <th class="p-4">단가 (Price)</th>
+                                <th class="p-4">재고 (Stock)</th>
+                                <th class="p-4">카테고리 (Category)</th>
+                                <th class="p-4 text-right">관리 (Actions)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100">
+                            <!-- JS Rendering Area -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty State Placeholder (Hidden by default, shown by JS if empty) -->
+                <div id="empty-state" class="hidden p-10 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-slate-900">데이터가 없습니다</h3>
+                    <p class="text-slate-500 mt-1">신규 상품을 등록하여 재고를 관리하세요.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal (Overlay & Content) -->
+    <div id="itemModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg relative overflow-hidden transform transition-all animate-[fadeIn_0.2s_ease-out] border border-slate-200">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 id="modal-title" class="text-lg font-bold text-slate-800">상품 정보 등록</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full p-1 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5">
+                <input type="hidden" id="edit-id">
+
+                <div class="form-group">
+                    <label for="name" class="block text-sm font-semibold text-slate-700 mb-1.5">상품명</label>
+                    <input type="text" id="name" placeholder="예: 무선 게이밍 마우스 G304" 
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow placeholder-slate-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="price" class="block text-sm font-semibold text-slate-700 mb-1.5">가격 (원)</label>
+                        <input type="number" id="price" placeholder="0" 
+                            class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow">
+                    </div>
+                    <div class="form-group">
+                        <label for="stock" class="block text-sm font-semibold text-slate-700 mb-1.5">재고 수량</label>
+                        <input type="number" id="stock" placeholder="0" 
+                            class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category" class="block text-sm font-semibold text-slate-700 mb-1.5">카테고리</label>
+                    <div class="relative">
+                        <select id="category" 
+                            class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-shadow appearance-none">
+                            <option value="electronics">전자기기 (Electronics)</option>
+                            <option value="clothing">의류 (Clothing)</option>
+                            <option value="food">식품 (Food)</option>
+                        </select>
+                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <button onclick="closeModal()" class="flex-1 bg-white border border-slate-300 text-slate-700 font-medium py-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+                    취소
+                </button>
+                <button id="save-btn" onclick="saveItem()" 
+                    class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all">
+                    저장 및 등록
+                </button>
+            </div>
         </div>
     </div>
-
-    <!-- Table -->
-    <div class="overflow-x-auto">
-        <table id="product-table" class="w-full border-collapse text-sm">
-            <thead>
-                <tr class="bg-gray-800 text-white">
-                    <th class="p-3 text-left w-12 rounded-tl-md">
-                        <input type="checkbox" id="select-all" class="cursor-pointer rounded text-blue-600 focus:ring-blue-500">
-                    </th>
-                    <th class="p-3 text-left">상품명</th>
-                    <th class="p-3 text-left">가격</th>
-                    <th class="p-3 text-left">재고</th>
-                    <th class="p-3 text-left">카테고리</th>
-                    <th class="p-3 text-left w-40 rounded-tr-md">관리</th>
-                </tr>
-            </thead>
-            <tbody id="table-body" class="divide-y divide-gray-200 border-x border-b border-gray-200">
-                <!-- 자바스크립트로 데이터가 렌더링 됩니다 -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Modal (Overlay & Content) -->
-<!-- 'hidden' 클래스로 기본 숨김 처리, JS에서 flex로 변경하여 중앙 정렬 -->
-<div id="itemModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm items-center justify-center">
-    <div class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 relative overflow-hidden animate-[fadeIn_0.2s_ease-out]">
-        <!-- Header -->
-        <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50">
-            <h3 id="modal-title" class="text-lg font-bold text-gray-800">상품 등록</h3>
-            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full p-1 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-        
-        <!-- Body -->
-        <div class="p-6 space-y-4">
-            <input type="hidden" id="edit-id">
-
-            <div class="form-group">
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">상품명</label>
-                <input type="text" id="name" placeholder="예: 무선 마우스" 
-                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-            </div>
-
-            <div class="form-group">
-                <label for="price" class="block text-sm font-medium text-gray-700 mb-1">가격</label>
-                <input type="number" id="price" placeholder="숫자만 입력" 
-                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-            </div>
-
-            <div class="form-group">
-                <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">재고 수량</label>
-                <input type="number" id="stock" placeholder="0" 
-                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-            </div>
-
-            <div class="form-group">
-                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
-                <select id="category" 
-                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition">
-                    <option value="electronics">전자기기</option>
-                    <option value="clothing">의류</option>
-                    <option value="food">식품</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="p-5 border-t border-gray-100 bg-gray-50">
-            <button id="save-btn" onclick="saveItem()" 
-                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded shadow-sm transition duration-200">
-                저장 하기
-            </button>
-        </div>
-    </div>
-</div>
 
 <script>
-    // --- 1. 데이터 관리 (상태 저장) ---
+    // --- 1. 데이터 관리 ---
     const STORAGE_KEY = 'qa_practice_inventory';
     
     const defaultData = [
-        { id: 'item-101', name: '게이밍 마우스', price: 55000, stock: 12, category: 'electronics' },
-        { id: 'item-102', name: '기계식 키보드', price: 125000, stock: 5, category: 'electronics' },
-        { id: 'item-201', name: '후드 티셔츠', price: 35000, stock: 50, category: 'clothing' },
-        { id: 'item-301', name: '유기농 커피빈', price: 15000, stock: 20, category: 'food' }
+        { id: 'item-101', name: 'Logitech G PRO Wireless', price: 169000, stock: 42, category: 'electronics' },
+        { id: 'item-102', name: 'Keychron K8 Pro Keyboard', price: 135000, stock: 15, category: 'electronics' },
+        { id: 'item-201', name: 'FastTrack Logo Hoodie (L)', price: 45000, stock: 120, category: 'clothing' },
+        { id: 'item-301', name: 'Premium Espresso Beans 1kg', price: 25000, stock: 8, category: 'food' }
     ];
 
     let inventoryData = [];
@@ -148,7 +234,6 @@
         loadData();
         renderTable();
         
-        // 전체 선택 이벤트 리스너
         const selectAllCheckbox = document.getElementById('select-all');
         if (selectAllCheckbox) {
             selectAllCheckbox.addEventListener('change', function(e) {
@@ -174,25 +259,24 @@
     }
 
     function resetData() {
-        if(confirm('데이터를 초기 상태로 되돌리시겠습니까? 모든 변경사항이 사라집니다.')) {
+        if(confirm('시스템 경고: 데이터를 초기 상태로 되돌리시겠습니까?\n모든 커스텀 데이터가 삭제됩니다.')) {
             localStorage.removeItem(STORAGE_KEY);
             loadData();
-            // 리셋 시 필터도 초기화
             const filterEl = document.getElementById('category-filter');
             if(filterEl) filterEl.value = 'all';
             
-            // 전체 선택 체크박스 해제
             const selectAll = document.getElementById('select-all');
             if(selectAll) selectAll.checked = false;
 
             renderTable();
-            alert('데이터가 초기화되었습니다.');
+            alert('데이터가 성공적으로 초기화되었습니다.');
         }
     }
 
-    // --- 2. 렌더링 및 필터링 ---
+    // --- 2. 렌더링 ---
     function renderTable() {
         const tbody = document.getElementById('table-body');
+        const emptyState = document.getElementById('empty-state');
         const filterEl = document.getElementById('category-filter');
         
         if (!tbody) return;
@@ -204,42 +288,64 @@
             ? inventoryData 
             : inventoryData.filter(item => item.category === filterVal);
 
+        if (filteredData.length === 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+        }
+
         filteredData.forEach((item, index) => {
             const tr = document.createElement('tr');
             tr.setAttribute('data-id', item.id);
-            // 짝수 행 배경색 적용 (Zebra striping)
-            tr.className = index % 2 === 0 ? "bg-white hover:bg-gray-50 transition" : "bg-gray-50 hover:bg-gray-100 transition";
+            tr.className = "hover:bg-blue-50/50 transition-colors group border-b border-slate-100 last:border-b-0";
             
-            // Tailwind 배지 스타일 적용
-            let badgeClass = 'bg-cyan-100 text-cyan-800 border border-cyan-200';
+            // 배지 스타일 개선
+            let badgeClass = 'bg-blue-100 text-blue-700 ring-1 ring-blue-600/20';
             let catText = '전자기기';
+            let icon = '🔌';
             
             if (item.category === 'clothing') { 
-                badgeClass = 'bg-purple-100 text-purple-800 border border-purple-200'; 
+                badgeClass = 'bg-violet-100 text-violet-700 ring-1 ring-violet-600/20'; 
                 catText = '의류'; 
+                icon = '👕';
             }
             if (item.category === 'food') { 
-                badgeClass = 'bg-green-100 text-green-800 border border-green-200'; 
+                badgeClass = 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20'; 
                 catText = '식품'; 
+                icon = '🍎';
             }
 
-            const formattedPrice = new Intl.NumberFormat('ko-KR').format(item.price) + "원";
+            const formattedPrice = new Intl.NumberFormat('ko-KR').format(item.price);
+            
+            // 재고 상태 컬러링
+            let stockClass = "text-slate-600 font-medium";
+            if (item.stock < 10) stockClass = "text-rose-600 font-bold";
 
             tr.innerHTML = `
-                <td class="p-3 border-b border-gray-200 text-center">
+                <td class="p-4 text-center">
                     <input type="checkbox" name="item-check" value="${item.id}" onchange="updateDeleteButtonState()" 
-                    class="cursor-pointer rounded text-blue-600 focus:ring-blue-500">
+                    class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
                 </td>
-                <td class="p-3 border-b border-gray-200 product-name font-medium text-gray-700">${item.name}</td>
-                <td class="p-3 border-b border-gray-200 text-gray-600">${formattedPrice}</td>
-                <td class="p-3 border-b border-gray-200 text-gray-600">${item.stock}</td>
-                <td class="p-3 border-b border-gray-200">
-                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}">${catText}</span>
+                <td class="p-4">
+                    <div class="flex flex-col">
+                        <span class="product-name font-semibold text-slate-900">${item.name}</span>
+                        <span class="text-xs text-slate-400 font-mono mt-0.5">${item.id}</span>
+                    </div>
                 </td>
-                <td class="p-3 border-b border-gray-200">
-                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white hover:text-white px-2 py-1 rounded text-xs transition mr-1" 
+                <td class="p-4 text-slate-600">₩${formattedPrice}</td>
+                <td class="p-4">
+                    <span class="${stockClass}">${item.stock}</span> 
+                    <span class="text-xs text-slate-400">ea</span>
+                </td>
+                <td class="p-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${badgeClass}">
+                        <span>${icon}</span> ${catText}
+                    </span>
+                </td>
+                <td class="p-4 text-right">
+                    <button class="bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-md text-xs font-medium transition mr-2" 
                         onclick="openModal('edit', '${item.id}')">수정</button>
-                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition" 
+                    <button class="bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 px-3 py-1.5 rounded-md text-xs font-medium transition" 
                         onclick="deleteItem('${item.id}')">삭제</button>
                 </td>
             `;
@@ -255,17 +361,30 @@
         if(selectAll) selectAll.checked = false;
     }
 
-    // --- 3. 버튼 상태 관리 ---
+    // --- 3. UI 인터랙션 ---
     function updateDeleteButtonState() {
         const checkboxes = document.querySelectorAll('input[name="item-check"]:checked');
         const deleteBtn = document.getElementById('delete-selected-btn');
         if (deleteBtn) {
             deleteBtn.disabled = checkboxes.length === 0;
-            // Tailwind disabled 상태는 클래스로 자동 처리되지만, 필요 시 추가 로직 가능
+            if (checkboxes.length > 0) {
+                deleteBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    선택 항목 삭제 (${checkboxes.length})
+                `;
+            } else {
+                deleteBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    선택 항목 삭제
+                `;
+            }
         }
     }
 
-    // --- 4. 모달 및 CRUD 기능 ---
     const modal = document.getElementById("itemModal");
     const modalTitle = document.getElementById("modal-title");
     const editIdInput = document.getElementById("edit-id");
@@ -273,12 +392,11 @@
     function openModal(mode, id = null) {
         if (!modal) return;
         
-        // [중요] Tailwind의 'hidden' 클래스를 제거하고 Flexbox를 적용하여 중앙 정렬
         modal.classList.remove("hidden");
         modal.classList.add("flex");
         
         if (mode === 'edit' && id) {
-            modalTitle.innerText = "상품 수정";
+            modalTitle.innerText = "상품 정보 수정";
             editIdInput.value = id;
             
             const item = inventoryData.find(i => i.id === id);
@@ -289,21 +407,19 @@
                 document.getElementById("category").value = item.category;
             }
         } else {
-            modalTitle.innerText = "상품 등록";
+            modalTitle.innerText = "신규 상품 등록";
             editIdInput.value = ""; 
             clearModalInputs();
         }
         
-        // 포커스 이동 시 약간의 지연을 주어 모달이 렌더링 된 후 실행되도록 함
         setTimeout(() => {
             const nameInput = document.getElementById("name");
             if(nameInput) nameInput.focus();
-        }, 50);
+        }, 100);
     }
 
     function closeModal() {
         if (!modal) return;
-        // 다시 숨김 처리
         modal.classList.add("hidden");
         modal.classList.remove("flex");
         clearModalInputs();
@@ -316,7 +432,6 @@
         document.getElementById("category").value = "electronics";
     }
 
-    // 배경 클릭 시 닫기
     window.onclick = function(event) {
         if (event.target == modal) {
             closeModal();
@@ -331,7 +446,8 @@
         const category = document.getElementById("category").value;
 
         if (!name || !price || !stock) {
-            alert("모든 필드를 입력해주세요.");
+            // Tailwind Toast를 띄우면 좋겠지만 간단히 Alert 유지
+            alert("모든 필드를 올바르게 입력해주세요.");
             return;
         }
 
@@ -347,12 +463,12 @@
                 };
             }
         } else {
-            const newId = "item-" + Date.now();
+            const newId = "sku-" + Date.now().toString().slice(-6); // ID 포맷 변경해봄 (SKU 느낌)
             inventoryData.push({
                 id: newId,
                 name,
-                price: parseInt(price),
-                stock: parseInt(stock), 
+                price: parseInt(price), 
+                stock: parseInt(stock),
                 category
             });
         }
@@ -363,7 +479,7 @@
     }
 
     function deleteItem(id) {
-        if (confirm('정말로 이 항목을 삭제하시겠습니까?')) {
+        if (confirm('삭제 확인: 이 항목을 영구적으로 삭제하시겠습니까?')) {
             inventoryData = inventoryData.filter(item => item.id !== id);
             saveToStorage();
             renderTable();
@@ -374,7 +490,7 @@
         const checkboxes = document.querySelectorAll('input[name="item-check"]:checked');
         if (checkboxes.length === 0) return;
 
-        if (confirm(`선택한 ${checkboxes.length}개의 항목을 삭제하시겠습니까?`)) {
+        if (confirm(`다중 삭제 확인: 선택한 ${checkboxes.length}개의 항목을 삭제하시겠습니까?`)) {
             const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
             inventoryData = inventoryData.filter(item => !idsToDelete.includes(item.id));
             
